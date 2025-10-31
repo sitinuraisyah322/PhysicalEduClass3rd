@@ -145,8 +145,10 @@
             auth: null,
             userId: null,
             materials: [],
-            currentView: 'home', // 'home', 'semester1', 'semester2', 'material', 'admin', 'gallery'
+            currentView: 'home', // 'home', 'semester1', 'semester2', 'material', 'admin', 'admin-login', 'gallery'
             currentMaterialId: null,
+            isAdmin: false, // FLAG BARU UNTUK ADMIN
+            ADMIN_PASSWORD: "PJOKAdmin2025" // KATA SANDI ADMIN
         };
 
         // --- MANDATORY FIREBASE SETUP ---
@@ -319,6 +321,12 @@
                 return;
             }
 
+            // --- PROTEKSI ADMIN PAGE ---
+            if (PJOK_APP.currentView === 'admin' && !PJOK_APP.isAdmin) {
+                PJOK_APP.currentView = 'admin-login';
+            }
+            // ---------------------------
+
             // Determine content based on current view
             switch (PJOK_APP.currentView) {
                 case 'semester1':
@@ -330,6 +338,9 @@
                     break;
                 case 'admin':
                     content.innerHTML = renderAdminPage();
+                    break;
+                case 'admin-login': // HALAMAN LOGIN BARU
+                    content.innerHTML = renderAdminLoginPage();
                     break;
                 case 'gallery':
                     content.innerHTML = renderGalleryPage();
@@ -343,13 +354,22 @@
         window.renderApp = renderApp; // Expose to global scope for initial load
 
         function renderNav() {
+            // Cek status admin
+            const isAdmin = PJOK_APP.isAdmin;
+
             const views = [
                 { name: 'Beranda', view: 'home' },
                 { name: 'Semester 1', view: 'semester1' },
                 { name: 'Semester 2', view: 'semester2' },
                 { name: 'Galeri Ilustrasi', view: 'gallery' },
-                { name: 'Manajemen Materi', view: 'admin' },
             ];
+            
+            // Tambahkan menu Admin/Login berdasarkan status
+            if (isAdmin) {
+                views.push({ name: 'Manajemen Materi', view: 'admin' });
+            } else {
+                views.push({ name: 'Login Admin', view: 'admin-login' });
+            }
 
             const navContainer = document.getElementById('navbar');
             const mobileContainer = document.getElementById('mobile-menu');
@@ -476,11 +496,10 @@
         function renderSemesterPage(semester) {
             const isS1 = semester === 'semester1';
             const title = isS1 ? 'Materi Semester 1: Gerak Dasar dan Permainan' : 'Materi Semester 2: Kebugaran dan Pola Hidup Sehat';
-            const themeList = isS1 ? [1, 5] : [6, 10]; // Theme numbers for filtering
-
+            // Materials are sorted by 'order' in the listener
             const filteredMaterials = PJOK_APP.materials.filter(m => {
-                const themeNumber = parseInt(m.order, 10);
-                return themeNumber >= themeList[0] && themeNumber <= themeList[1];
+                const order = parseInt(m.order, 10);
+                return isS1 ? order >= 1 && order <= 5 : order >= 6 && order <= 10;
             });
 
             return `
@@ -516,7 +535,7 @@
 
             return `
                 <div class="bg-white rounded-xl shadow-2xl p-6 lg:p-10">
-                    <button onclick="navigate('${material.theme.toLowerCase().replace(' ', '')}')" class="text-primary-sky font-semibold mb-4 flex items-center hover:underline">
+                    <button onclick="navigate('semester${material.order <= 5 ? 1 : 2}')" class="text-primary-sky font-semibold mb-4 flex items-center hover:underline">
                         <i class="ph-arrow-left mr-2"></i> Kembali ke Daftar ${material.theme}
                     </button>
                     
@@ -614,7 +633,7 @@
             quizOptions.forEach(option => {
                 const isCorrect = option.toLowerCase() === promptWord.toLowerCase();
                 quizContent += `
-                    <button onclick="checkAnswer(this, ${isCorrect})" class="quiz-option p-4 bg-primary-sky text-white font-bold rounded-lg hover:bg-sky-600 transition duration-150 btn-interact">
+                    <button onclick="checkAnswer(this, ${isCorrect}, '${promptWord}')" class="quiz-option p-4 bg-primary-sky text-white font-bold rounded-lg hover:bg-sky-600 transition duration-150 btn-interact">
                         ${option}
                     </button>
                 `;
@@ -626,7 +645,7 @@
         }
         window.startQuiz = startQuiz;
 
-        function checkAnswer(button, isCorrect) {
+        function checkAnswer(button, isCorrect, correctWord) {
             const feedback = document.getElementById('quiz-feedback');
             document.querySelectorAll('.quiz-option').forEach(btn => btn.disabled = true);
             
@@ -637,10 +656,10 @@
                 setTimeout(() => closeModal(), 2000);
             } else {
                 button.classList.add('bg-red-500', 'border-4', 'border-red-800');
-                feedback.innerHTML = '<span class="text-red-500 text-2xl">😢 Aduh, Kurang Tepat. Coba Lagi!</span>';
+                feedback.innerHTML = '<span class="text-red-500 text-2xl">😢 Aduh, Kurang Tepat. Jawaban benar: ' + correctWord + '</span>';
                 document.querySelectorAll('.quiz-option').forEach(btn => {
-                    if (btn.textContent.trim().toLowerCase() === document.getElementById('quiz-feedback').dataset.answer.toLowerCase()) {
-                        btn.classList.add('border-4', 'border-green-500'); // Highlight correct answer (not fully implemented here, focus on feedback)
+                    if (btn.textContent.trim().toLowerCase() === correctWord.toLowerCase()) {
+                        btn.classList.add('border-4', 'border-green-500'); // Highlight correct answer
                     }
                 });
                 setTimeout(() => closeModal(), 3000);
@@ -678,7 +697,62 @@
         }
 
 
+        // --- ADMIN LOGIN PAGE (NEW) ---
+        function renderAdminLoginPage() {
+            return `
+                <div class="flex justify-center items-center py-20">
+                    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full border-t-4 border-red-500">
+                        <div class="text-center mb-6">
+                            <i class="ph-lock-key-fill text-5xl text-red-500"></i>
+                            <h2 class="text-2xl font-bold text-gray-800 mt-3">Akses Guru PJOK</h2>
+                            <p class="text-sm text-gray-600">Masukkan kata sandi untuk mengelola materi.</p>
+                        </div>
+                        <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                            <label class="block mb-4">
+                                <span class="text-gray-700 font-medium">Kata Sandi Admin</span>
+                                <input type="password" id="admin-password" required 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50">
+                            </label>
+                            <div id="login-feedback" class="text-center text-red-500 mb-4 font-medium"></div>
+                            <button type="submit" 
+                                class="w-full px-4 py-3 bg-red-500 text-white font-bold rounded-lg btn-interact hover:bg-red-600 flex items-center justify-center">
+                                <i class="ph-sign-in-fill mr-2 text-xl"></i> Masuk
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+        window.renderAdminLoginPage = renderAdminLoginPage;
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('admin-password');
+            const feedback = document.getElementById('login-feedback');
+
+            if (passwordInput.value === PJOK_APP.ADMIN_PASSWORD) {
+                PJOK_APP.isAdmin = true;
+                feedback.textContent = 'Login Berhasil! Mengarahkan...';
+                feedback.classList.remove('text-red-500');
+                feedback.classList.add('text-secondary-leaf');
+                setTimeout(() => navigate('admin'), 500);
+            } else {
+                feedback.textContent = 'Kata Sandi Salah. Silakan coba lagi.';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+        window.handleAdminLogin = handleAdminLogin;
+
+
         // --- ADMIN PANEL RENDERING & LOGIC ---
+
+        function handleAdminLogout() {
+            PJOK_APP.isAdmin = false;
+            showModal("Logout Sukses", "Anda telah keluar dari mode administrator. Akses manajemen materi ditutup.");
+            navigate('home');
+        }
+        window.handleAdminLogout = handleAdminLogout;
 
         function renderAdminPage() {
             const materialList = PJOK_APP.materials.map(m => `
@@ -698,7 +772,14 @@
 
             return `
                 <div class="pb-10">
-                    <h2 class="text-3xl font-extrabold text-red-500 mb-6 border-b-4 border-red-500/50 pb-2">⚙️ Manajemen Materi (Khusus Guru/Admin)</h2>
+                    <div class="flex justify-between items-center mb-6 border-b-4 border-red-500/50 pb-2">
+                        <h2 class="text-3xl font-extrabold text-red-500">⚙️ Manajemen Materi (Mode Admin Aktif)</h2>
+                        <button onclick="handleAdminLogout()" 
+                            class="px-4 py-2 bg-gray-600 text-white text-sm font-bold rounded-full hover:bg-gray-700 transition duration-150">
+                            <i class="ph-sign-out-fill mr-1"></i> Logout
+                        </button>
+                    </div>
+
                     <p class="text-gray-700 mb-6">Di sini Anda dapat menambah, mengubah, dan menghapus materi pembelajaran PJOK.</p>
 
                     <button onclick="openAddModal()" 
@@ -749,15 +830,16 @@
                             <input type="text" name="title" value="${data.title}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                         </label>
                         <label class="block">
-                            <span class="text-gray-700 font-medium">Nomor Urut Tema (1-10)</span>
+                            <span class="text-gray-700 font-medium">Nomor Urut Tema (1-10, untuk menentukan Semester)</span>
                             <input type="number" name="order" value="${data.order || ''}" required min="1" max="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                         </label>
                         <label class="block">
-                            <span class="text-gray-700 font-medium">Tema Semester</span>
-                            <select name="theme" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
-                                <option value="Semester 1" ${data.theme === 'Semester 1' ? 'selected' : ''}>Semester 1</option>
-                                <option value="Semester 2" ${data.theme === 'Semester 2' ? 'selected' : ''}>Semester 2</option>
+                            <span class="text-gray-700 font-medium">Tema Semester (Otomatis berdasarkan Nomor Urut)</span>
+                            <select name="theme" disabled class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100">
+                                <option value="Semester 1" ${(data.order <= 5) ? 'selected' : ''}>Semester 1 (Tema 1-5)</option>
+                                <option value="Semester 2" ${(data.order > 5) ? 'selected' : ''}>Semester 2 (Tema 6-10)</option>
                             </select>
+                            <input type="hidden" name="theme_value" value="${(data.order <= 5) ? 'Semester 1' : 'Semester 2'}">
                         </label>
                         <label class="block">
                             <span class="text-gray-700 font-medium">Narasi Cerita Singkat (Maks. 1 Kalimat)</span>
@@ -798,14 +880,17 @@
             document.getElementById('material-form').onsubmit = async function(e) {
                 e.preventDefault();
                 const form = e.target;
+                const orderValue = parseInt(form.order.value, 10);
+
                 const data = {
                     title: form.title.value,
                     narration: form.narration.value,
                     description: form.description.value,
-                    theme: form.theme.value,
+                    // Tentukan tema berdasarkan urutan (1-5 = S1, 6-10 = S2)
+                    theme: orderValue <= 5 ? 'Semester 1' : 'Semester 2', 
                     animationType: form.animationType.value,
                     audioUrl: form.audioUrl.value,
-                    order: parseInt(form.order.value, 10),
+                    order: orderValue,
                     // Convert keywords string to array
                     keywords: form.keywords.value.split(',').map(k => k.trim()).filter(k => k.length > 0)
                 };
@@ -842,8 +927,8 @@
             footerEl.innerHTML = '';
 
             if (isConfirm) {
-                const cancelBtn = `<button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150">Batal</button>`;
-                const confirmBtn = `<button id="modal-confirm-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-150">${confirmText}</button>`;
+                const cancelBtn = `<button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150 mr-3">Batal</button>`;
+                const confirmBtn = `<button id="modal-confirm-btn" class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition duration-150">${confirmText}</button>`;
                 
                 footerEl.innerHTML = cancelBtn + confirmBtn;
 
