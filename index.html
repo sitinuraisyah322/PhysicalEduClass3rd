@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PJOK Seru SD 3 - Kurikulum Merdeka</title>
+    <!-- Memuat Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Font Inter -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .text-shadow { text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); }
+        .bg-gradient-pjok { background-image: linear-gradient(to bottom right, #e0f2fe, #d1fae5); }
+    </style>
+</head>
+<body class="bg-gradient-pjok min-h-screen">
+
+    <!-- Kontainer Utama Aplikasi -->
+    <div id="app-container" class="relative">
+        <!-- Header/Navbar akan di-render di sini -->
+        <header id="header-container"></header>
+
+        <!-- Konten Halaman Utama akan di-render di sini -->
+        <main id="content-container" class="pt-[72px]"></main>
+
+        <!-- Modal Admin/Quiz akan di-render di sini -->
+        <div id="modal-container"></div>
+
+        <!-- Footer -->
+        <footer class="bg-blue-600 text-white p-4 text-center text-sm">
+            &copy; 2025 PJOK Seru SD 3 | Kurikulum Merdeka
+        </footer>
+    </div>
+
+    <!-- Modul Firebase dari CDN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, updateDoc, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Atur level log untuk melihat pesan Firebase di konsol (Opsional, tapi disarankan untuk debugging)
+        setLogLevel('debug');
+
+        // --- VARIABEL GLOBAL FIREBASE & CONFIG (WAJIB DIGUNAKAN) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-pjok-app';
+
+        // --- VARIABEL STATE APLIKASI GLOBAL ---
+        window.currentPage = 'home';
+        window.materiData = [];
+        window.selectedMateri = null;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.isAuthReady = false;
+        window.quizAnswer = null; // State untuk kuis
+
+        // --- DATA DUMMY AWAL ---
+        window.initialMateri = [
+            { id: 't1', title: 'Gerak Lokomotor', description: 'Berlari, melompat, dan berjalan. Gerakan berpindah tempat!', semester: 1, theme: 1, animationUrl: 'https://placehold.co/150x150/84cc16/ffffff?text=LARI', audioText: 'Mari berlari mengejar impian!', quiz: { question: 'Gerak berpindah tempat disebut...?', options: ['Non-lokomotor', 'Lokomotor', 'Manipulatif'], answer: 'Lokomotor' }, order: 10 },
+            { id: 't2', title: 'Gerak Non-Lokomotor', description: 'Menekuk, meregang, mengayun. Bergerak di tempat!', semester: 1, theme: 2, animationUrl: 'https://placehold.co/150x150/ef4444/ffffff?text=REGANG', audioText: 'Ayo regangkan ototmu seperti pohon tertiup angin!', quiz: { question: 'Contoh gerak non-lokomotor adalah...', options: ['Berjalan', 'Mengayun', 'Melempar'], answer: 'Mengayun' }, order: 20 },
+            { id: 't3', title: 'Gerak Manipulatif', description: 'Melempar, menangkap, memukul. Menggunakan benda!', semester: 1, theme: 3, animationUrl: 'https://placehold.co/150x150/3b82f6/ffffff?text=LEM PAR', audioText: 'Tangkap bolanya, kawan! Hati-hati jangan sampai jatuh.', quiz: { question: 'Gerak menangkap bola adalah...?', options: ['Non-lokomotor', 'Lokomotor', 'Manipulatif'], answer: 'Manipulatif' }, order: 30 },
+            { id: 't4', title: 'Permainan Tradisional', description: 'Engklek, gobak sodor, dan kasti mini. Seru sekali!', semester: 1, theme: 4, animationUrl: 'https://placehold.co/150x150/f97316/ffffff?text=ENGK LEK', audioText: 'Permainan tradisional membuat kita sehat dan ceria!', quiz: { question: 'Engklek melatih apa?', options: ['Keseimbangan', 'Tidur', 'Membaca'], answer: 'Keseimbangan' }, order: 40 },
+            { id: 't5', title: 'Kebugaran & Kesehatan', description: 'Pentingnya menjaga tubuh agar selalu bugar dan sehat.', semester: 1, theme: 5, animationUrl: 'https://placehold.co/150x150/10b981/ffffff?text=SEHAT', audioText: 'Tubuh yang sehat membuat pikiran menjadi cerdas!', quiz: { question: 'Untuk bugar, kita perlu...', options: ['Makan permen', 'Olahraga teratur', 'Main HP'], answer: 'Olahraga teratur' }, order: 50 },
+            { id: 't6', title: 'Aktivitas Air', description: 'Dasar-dasar renang dan menjaga keseimbangan di air.', semester: 2, theme: 6, animationUrl: 'https://placehold.co/150x150/0ea5e9/ffffff?text=RENANG', audioText: 'Berenang itu seru! Jangan lupa pemanasan ya.', quiz: { question: 'Aktivitas air yang paling penting adalah...', options: ['Menyelam', 'Menyeberang', 'Pemanasan'], answer: 'Pemanasan' }, order: 60 },
+            { id: 't7', title: 'Senam & Tari Dasar', description: 'Menggerakkan tubuh dengan irama. Senam irama yang indah.', semester: 2, theme: 7, animationUrl: 'https://placehold.co/150x150/c026d3/ffffff?text=SENAM', audioText: 'Tarik napas, buang napas. Senam membuat hati gembira!', quiz: { question: 'Senam menggunakan bantuan...', options: ['Irama', 'Tali', 'Batu'], answer: 'Irama' }, order: 70 },
+            { id: 't8', title: 'Permainan Berkelompok', description: 'Belajar bekerja sama, seperti bermain bola basket mini.', semester: 2, theme: 8, animationUrl: 'https://placehold.co/150x150/f59e0b/ffffff?text=TEAM', audioText: 'Bekerja sama itu penting agar tim kita menang!', quiz: { question: 'Nilai utama permainan kelompok adalah...', options: ['Individu', 'Kompetisi', 'Kerjasama'], answer: 'Kerjasama' }, order: 80 },
+            { id: 't9', title: 'Istirahat & Pola Sehat', description: 'Pentingnya tidur cukup dan menjaga pola makan sehat.', semester: 2, theme: 9, animationUrl: 'https://placehold.co/150x150/6b7280/ffffff?text=TIDUR', audioText: 'Setelah lelah bermain, tubuh perlu istirahat yang cukup.', quiz: { question: 'Kenapa kita perlu istirahat?', options: ['Agar lemas', 'Agar tubuh segar kembali', 'Agar lapar'], answer: 'Agar tubuh segar kembali' }, order: 90 },
+            { id: 't10', title: 'Sportivitas', description: 'Junjung tinggi nilai sportivitas dan semangat kebersamaan.', semester: 2, theme: 10, animationUrl: 'https://placehold.co/150x150/14b8a6/ffffff?text=NILAI', audioText: 'Menang atau kalah, kita harus tetap sportif dan saling menghargai.', quiz: { question: 'Jika kalah, sikap kita harus...', options: ['Marah', 'Menangis', 'Mengucapkan selamat'], answer: 'Mengucapkan selamat' }, order: 100 },
+        ];
+
+
+        // --- FUNGSI UTILITY ---
+        window.navigateTo = (page, materi = null) => {
+            window.currentPage = page;
+            window.selectedMateri = materi;
+            window.quizAnswer = null; // Reset kuis saat navigasi
+            window.renderApp();
+            window.scrollTo(0, 0);
+        };
+
+        window.speak = (text) => {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                window.speechSynthesis.speak(utterance);
+                console.log(`Memainkan audio: "${text}"`);
+            } else {
+                alert('Browser Anda tidak mendukung Web Speech API untuk fitur suara.');
+            }
+        };
+
+        window.MateriCard = (materi) => {
+            const isSemester1 = materi.semester === 1;
+            const color = isSemester1 ? 'bg-orange-400' : 'bg-green-400';
+            const hoverColor = isSemester1 ? 'hover:bg-orange-500' : 'hover:bg-green-500';
+            const shadowColor = isSemester1 ? 'shadow-orange-600' : 'shadow-green-600';
+
+            return `
+                <div onclick="navigateTo('materiDetail', JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(materi))}')))"
+                    class="relative ${color} p-4 rounded-xl shadow-lg ${shadowColor} transform transition duration-300 ${hoverColor} cursor-pointer hover:scale-[1.02] active:scale-100">
+                    <div class="absolute top-2 left-2 text-xs font-bold bg-white text-gray-800 px-2 py-0.5 rounded-full shadow-md">
+                        Tema ${materi.theme}
+                    </div>
+                    <h3 class="text-xl font-extrabold text-white mt-4 mb-2 text-shadow">
+                        ${materi.title}
+                    </h3>
+                    <p class="text-sm text-white opacity-90">${materi.description.substring(0, 50)}...</p>
+                    <div class="mt-3 text-right">
+                        <button class="bg-white text-gray-800 font-bold py-1 px-3 rounded-lg shadow-md hover:bg-blue-100 transition duration-200">
+                            Pelajari
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- MANAJEMEN FIREBASE ---
+        window.initFirebase = async () => {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config is missing.");
+                window.isAuthReady = true;
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+
+            // 1. Setup Auth Listener
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) {
+                    window.userId = user.uid;
+                } else {
+                    // Coba login dengan custom token atau anonim
+                    if (initialAuthToken) {
+                        try {
+                            const userCredential = await signInWithCustomToken(window.auth, initialAuthToken);
+                            window.userId = userCredential.user.uid;
+                        } catch (error) {
+                            console.error("Error signing in with custom token, falling back to anonymous:", error);
+                            const userCredential = await signInAnonymously(window.auth);
+                            window.userId = userCredential.user.uid;
+                        }
+                    } else {
+                        const userCredential = await signInAnonymously(window.auth);
+                        window.userId = userCredential.user.uid;
+                    }
+                }
+                window.isAuthReady = true;
+                window.renderApp(); // Render ulang setelah auth siap
+                window.setupFirestoreListener(); // Mulai listener setelah auth siap
+            });
+        };
+
+        window.setupFirestoreListener = () => {
+            if (!window.db || !window.isAuthReady) return;
+
+            const materiCollectionRef = collection(window.db, `artifacts/${appId}/public/data/pjok_materi`);
+            const q = query(materiCollectionRef, orderBy('semester', 'asc'), orderBy('order', 'asc'));
+
+            onSnapshot(q, (snapshot) => {
+                let materiList = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    materiList.push({
+                        id: doc.id,
+                        ...data,
+                        // Deserialize quiz object
+                        quiz: data.quiz ? JSON.parse(data.quiz) : { question: '', options: [], answer: '' }
+                    });
+                });
+
+                if (materiList.length === 0) {
+                    // Jika kosong, isi dengan data dummy
+                    console.log("Database kosong, mengisi dengan data awal...");
+                    window.initialMateri.forEach(item => {
+                        const newDocRef = doc(materiCollectionRef);
+                        setDoc(newDocRef, {
+                            ...item,
+                            // Serialize quiz object for storage
+                            quiz: JSON.stringify(item.quiz),
+                            id: newDocRef.id
+                        });
+                    });
+                    window.materiData = window.initialMateri;
+                } else {
+                    window.materiData = materiList;
+                }
+                window.renderApp(); // Render ulang setelah data terupdate
+            }, (error) => {
+                console.error("Error fetching data from Firestore:", error);
+                // Fallback ke data inisial jika gagal fetch
+                window.materiData = window.initialMateri;
+                window.renderApp();
+            });
+        };
+
+        // --- LOGIKA RENDER KOMPONEN UI ---
+
+        window.renderLoading = () => {
+            document.getElementById('content-container').innerHTML = `
+                <div class="flex items-center justify-center min-h-[80vh]">
+                    <div class="p-6 rounded-xl bg-white shadow-xl flex items-center space-x-3">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-gray-700 font-medium">Memuat dan Menyiapkan Aplikasi Interaktif...</p>
+                    </div>
+                </div>
+            `;
+        };
+
+
+        window.renderHeader = () => {
+            const NavItem = (name, target, icon = '') => {
+                const isActive = window.currentPage.startsWith(target.replace(/[0-9]/g, ''));
+                return `
+                    <button onclick="navigateTo('${target}')"
+                        class="px-3 py-1 rounded-full text-sm font-semibold transition duration-200 
+                        ${isActive ? 'bg-orange-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}">
+                        ${icon} ${name}
+                    </button>
+                `;
+            };
+
+            const adminNav = window.userId ? NavItem('Admin', 'admin', '🔑') : '';
+
+            document.getElementById('header-container').innerHTML = `
+                <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-lg p-3">
+                    <div class="max-w-7xl mx-auto flex justify-between items-center">
+                        <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
+                            <span class="text-3xl" role="img" aria-label="ball-emoji">⚽</span>
+                            <h1 class="text-xl font-extrabold text-blue-600 tracking-tight">
+                                PJOK Seru SD 3
+                            </h1>
+                        </div>
+                        <div class="space-x-2 md:space-x-4 flex items-center text-xs md:text-sm">
+                            ${NavItem('Beranda', 'home')}
+                            ${NavItem('Smt 1', 'semester1')}
+                            ${NavItem('Smt 2', 'semester2')}
+                            ${NavItem('Galeri', 'gallery')}
+                            ${adminNav}
+                        </div>
+                    </div>
+                </nav>
+            `;
+        };
+
+        window.renderHome = () => {
+            document.getElementById('content-container').innerHTML = `
+                <div class="min-h-[90vh] p-4 bg-gradient-to-br from-blue-100 to-green-100 flex items-center justify-center">
+                    <div class="max-w-4xl mx-auto text-center py-16 px-4">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-blue-700 mb-4 animate-fade-in-down">
+                            Selamat Datang di Dunia PJOK Seru!
+                        </h2>
+                        <p class="text-lg md:text-xl text-gray-700 mb-8">
+                            Ayo bergerak, bermain, dan belajar bersama Bu Siti dan teman-teman!
+                        </p>
+
+                        <div class="flex justify-center space-x-6 md:space-x-12 mb-12">
+                            <div class="bg-white p-4 md:p-6 rounded-full shadow-2xl border-4 border-orange-400">
+                                <span class="text-6xl md:text-8xl block transform rotate-6" role="img" aria-label="teacher">👩‍🏫</span>
+                            </div>
+                            <div class="bg-white p-4 md:p-6 rounded-full shadow-2xl border-4 border-green-400">
+                                <span class="text-6xl md:text-8xl block transform -rotate-6" role="img" aria-label="kids">🤸‍♂️</span>
+                            </div>
+                        </div>
+
+                        <button onclick="navigateTo('semester1')"
+                            class="bg-orange-500 text-white text-xl md:text-2xl font-bold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-xl hover:bg-orange-600 transform hover:scale-105 transition duration-300 border-b-4 border-orange-700">
+                            Mulai Belajar Sekarang!
+                        </button>
+                    </div>
+                    <!-- Animasi Ringan -->
+                    <div class="absolute bottom-16 left-8 text-4xl animate-bounce">⚽</div>
+                    <div class="absolute top-20 right-8 text-4xl animate-pulse">☀️</div>
+                </div>
+            `;
+        };
+
+        window.renderSemester = (semester) => {
+            const title = semester === 1 ? 'Semester 1: Gerak Dasar & Permainan' : 'Semester 2: Kebugaran & Pola Hidup Sehat';
+            const filteredMateri = window.materiData.filter(m => m.semester === semester);
+            const bgColor = semester === 1 ? 'from-orange-100 to-yellow-100' : 'from-green-100 to-blue-100';
+            
+            const materiCards = filteredMateri.length > 0
+                ? filteredMateri.map(window.MateriCard).join('')
+                : '<p class="text-center col-span-full text-gray-600 p-8">Belum ada materi untuk semester ini.</p>';
+
+            document.getElementById('content-container').innerHTML = `
+                <div class="min-h-[90vh] p-8 bg-gradient-to-br ${bgColor}">
+                    <div class="max-w-6xl mx-auto">
+                        <h2 class="text-3xl md:text-4xl font-extrabold mb-8 text-center ${semester === 1 ? 'text-orange-700' : 'text-green-700'} border-b-4 pb-2">
+                            ${title}
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            ${materiCards}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.renderDetail = () => {
+            const materi = window.selectedMateri;
+            if (!materi) {
+                window.navigateTo('home');
+                return;
+            }
+
+            const { title, description, animationUrl, audioText, quiz, semester } = materi;
+            const isCorrect = window.quizAnswer === quiz.answer;
+            const quizResultClass = window.quizAnswer ? (isCorrect ? 'bg-green-500' : 'bg-red-500') : 'hidden';
+            const quizResultMessage = isCorrect ? '🎉 Hore! Jawabanmu Benar!' : '😔 Belum Tepat. Coba Lagi atau Pelajari Lebih Dalam.';
+            const story = `Hari ini Bu Siti dan teman-teman akan belajar tentang ${title}. ${description}`; // Diubah
+            const char = semester === 1 ? '🤸‍♂️' : '🏊';
+            const color = semester === 1 ? 'bg-orange-100 border-orange-500' : 'bg-green-100 border-green-500';
+            const textColor = semester === 1 ? 'text-orange-800' : 'text-green-800';
+
+            const quizOptions = quiz.options.map((option, index) => {
+                const isSelected = window.quizAnswer === option;
+                let optionClass = 'bg-white text-gray-800 border-2 border-orange-200 hover:bg-orange-100';
+                if (window.quizAnswer !== null) {
+                    if (isSelected && isCorrect) {
+                        optionClass = 'bg-green-400 text-white ring-4 ring-green-300 shadow-lg';
+                    } else if (isSelected && !isCorrect) {
+                        optionClass = 'bg-red-400 text-white ring-4 ring-red-300 shadow-lg';
+                    } else if (option === quiz.answer) {
+                         optionClass = 'bg-green-100 text-gray-800 border-2 border-green-400 shadow-md'; // Tunjukkan jawaban benar
+                    }
+                }
+
+                return `
+                    <button
+                        onclick="window.checkQuiz('${option.replace(/'/g, "\\'")}')"
+                        ${window.quizAnswer !== null ? 'disabled' : ''}
+                        class="w-full text-left p-3 rounded-lg font-medium transition duration-300 transform hover:scale-[1.01] active:scale-100 ${optionClass}"
+                    >
+                        ${option}
+                    </button>
+                `;
+            }).join('');
+
+            document.getElementById('content-container').innerHTML = `
+                <div class="min-h-[90vh] p-8 bg-gray-50">
+                    <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-blue-500">
+                        <button onclick="navigateTo('semester${semester}')"
+                            class="text-blue-500 hover:text-blue-700 mb-4 font-semibold flex items-center">
+                            <span class="mr-1">⬅️</span> Kembali ke Semester ${semester}
+                        </button>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-blue-800 mb-6">${title}</h2>
+
+                        <!-- Narasi Cerita -->
+                        <div class="p-4 rounded-xl shadow-lg border-l-8 ${color} mb-8">
+                            <div class="flex items-start space-x-3">
+                                <span class="text-4xl">${char}</span>
+                                <div>
+                                    <p class="font-bold text-lg ${textColor}">Bu Siti Berkata:</p> <!-- Diubah -->
+                                    <p class="text-gray-700 text-base">${story}</p>
+                                    <button onclick="speak('${story.replace(/'/g, "\\'")}')"
+                                        class="mt-2 text-sm text-blue-600 font-semibold hover:underline flex items-center">
+                                        <span class="text-xl mr-1">🗣️</span> Dengar Narasi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <div class="lg:w-1/2">
+                                <h3 class="text-2xl font-bold text-gray-700 mb-3">Penjelasan Gerak</h3>
+                                <p class="text-gray-600 mb-4">${description}</p>
+                                <div class="bg-gray-200 p-4 rounded-xl flex justify-center items-center h-48 border-4 border-dashed border-gray-400">
+                                    <img src="${animationUrl}" alt="${title} ilustrasi" class="rounded-lg w-full h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x150/60a5fa/ffffff?text=ILUSTRASI+GERAK';" />
+                                </div>
+                                <div class="flex space-x-4 mt-4">
+                                    <button onclick="speak('Ini adalah gerakan ${title}. ${audioText.replace(/'/g, "\\'")}')"
+                                        class="bg-green-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-green-600 flex items-center transition duration-200">
+                                        <span class="text-xl mr-1">🗣️</span> Dengar Penjelasan
+                                    </button>
+                                    <a href="${animationUrl}" target="_blank" rel="noopener noreferrer"
+                                       class="bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 flex items-center transition duration-200">
+                                        <span class="text-xl mr-1">▶️</span> Lihat Animasi (Dummy)
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="lg:w-1/2 bg-orange-50 p-6 rounded-xl shadow-inner border-2 border-orange-300">
+                                <h3 class="text-2xl font-bold text-orange-700 mb-4 flex items-center">
+                                    <span class="text-3xl mr-2">🧩</span> Latihan Yuk!
+                                </h3>
+                                <p class="font-semibold text-gray-700 mb-4">${quiz.question}</p>
+
+                                <div class="space-y-3">
+                                    ${quizOptions}
+                                </div>
+
+                                <div class="mt-4 p-3 rounded-lg ${quizResultClass} text-white font-bold text-center">
+                                    ${quizResultMessage}
+                                    <button onclick="window.quizAnswer = null; window.renderApp();" class="ml-4 underline text-sm">Ulangi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.checkQuiz = (selectedOption) => {
+            window.quizAnswer = selectedOption;
+            window.renderApp();
+        };
+
+        window.renderGallery = () => {
+             const galleryItems = window.materiData.map(m => `
+                <div onclick="speak('Ini adalah gerakan ${m.title}. ${m.audioText.replace(/'/g, "\\'")}')"
+                    class="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-105 cursor-pointer active:scale-100">
+                    <img
+                        src="${m.animationUrl}"
+                        alt="${m.title}"
+                        class="w-full h-32 object-contain mb-3 rounded-lg border-2 border-gray-100"
+                        onerror="this.onerror=null; this.src='https://placehold.co/150x150/3b82f6/ffffff?text=ILUSTRASI';"
+                    />
+                    <p class="font-bold text-center text-blue-600">${m.title}</p>
+                    <p class="text-xs text-gray-500 text-center">Tap untuk Suara 🗣️</p>
+                </div>
+            `).join('');
+
+            document.getElementById('content-container').innerHTML = `
+                <div class="min-h-[90vh] p-8 bg-gradient-to-tr from-blue-50 to-orange-50">
+                    <div class="max-w-6xl mx-auto">
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8 text-center border-b-4 border-blue-400 pb-2">
+                            Galeri Ilustrasi PJOK Seru!
+                        </h2>
+                        <p class="text-center text-gray-600 mb-8">
+                            Klik gambar untuk mendengar penjelasan singkat dari Bu Siti. <!-- Diubah -->
+                        </p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            ${galleryItems}
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.renderAdmin = () => {
+            if (!window.userId) {
+                 document.getElementById('content-container').innerHTML = `
+                    <div class="min-h-[90vh] pt-20 p-8 text-center text-red-500 flex items-center justify-center">
+                        Akses Admin Dibatasi. Silakan refresh jika Anda seharusnya memiliki akses.
+                    </div>
+                `;
+                return;
+            }
+
+            const tableRows = window.materiData.map(materi => {
+                const encodedMateri = encodeURIComponent(JSON.stringify(materi));
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${materi.semester}/${materi.theme}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${materi.title}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">${materi.description}</td>
+                        <td class="px-6 py-4 text-sm text-blue-500 truncate max-w-xs hover:underline"><a href="${materi.animationUrl}" target="_blank">Lihat URL</a></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button onclick="window.openMateriModal(JSON.parse(decodeURIComponent('${encodedMateri}')))"
+                                class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                            <button onclick="window.deleteMateri('${materi.id}', '${materi.title.replace(/'/g, "\\'")}')"
+                                class="text-red-600 hover:text-red-900">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('content-container').innerHTML = `
+                <div class="min-h-[90vh] p-8 bg-gray-100">
+                    <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-red-600 mb-6 border-b pb-2">
+                            🔑 Panel Admin: Manajemen Materi
+                        </h2>
+                         <p class="mb-4 text-sm text-gray-600 break-all">
+                            Path: <code>/artifacts/${appId}/public/data/pjok_materi</code> | User ID: <code>${window.userId}</code>
+                        </p>
+
+                        <button onclick="window.openMateriModal(null)"
+                            class="bg-red-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300 mb-6 flex items-center">
+                            <span class="text-xl mr-2">+</span> Tambah Materi Baru
+                        </button>
+
+                        <div class="overflow-x-auto rounded-lg border">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S/T</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul Materi</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Ilustrasi</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- CRUD FIREBASE HANDLERS ---
+        window.deleteMateri = async (id, title) => {
+            // Menggunakan fungsi kustom sederhana karena window.confirm dilarang
+            if (!confirmAction(`Yakin ingin menghapus materi: ${title}?`)) return;
+
+            try {
+                const docRef = doc(window.db, `artifacts/${appId}/public/data/pjok_materi`, id);
+                await deleteDoc(docRef);
+                console.log(`Materi ${id} berhasil dihapus.`);
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                alertMessage("Gagal menghapus materi. Cek konsol untuk detail.");
+            }
+        };
+
+        window.saveMateri = async (formData, isEditing, itemId) => {
+            const quizData = {
+                question: formData.quizQuestion,
+                options: [formData.quizOption1, formData.quizOption2, formData.quizOption3].filter(o => o.trim() !== ''),
+                answer: formData.quizAnswer,
+            };
+
+            const newMateri = {
+                title: formData.title,
+                description: formData.description,
+                semester: parseInt(formData.semester),
+                theme: parseInt(formData.theme),
+                order: parseInt(formData.order),
+                animationUrl: formData.animationUrl,
+                audioText: formData.audioText,
+                // Serialize quiz object for Firestore
+                quiz: JSON.stringify(quizData),
+            };
+
+            try {
+                const materiCollectionRef = collection(window.db, `artifacts/${appId}/public/data/pjok_materi`);
+                if (isEditing) {
+                    const docRef = doc(materiCollectionRef, itemId);
+                    await updateDoc(docRef, newMateri);
+                    console.log("Document updated with ID: ", itemId);
+                } else {
+                    await setDoc(doc(materiCollectionRef), newMateri);
+                    console.log("New document added.");
+                }
+                window.closeMateriModal();
+            } catch (e) {
+                console.error("Error adding/updating document: ", e);
+                alertMessage("Gagal menyimpan data. Cek konsol untuk detail.");
+            }
+        };
+
+        // --- MODAL UTILITY (PENGGANTI ALERT/CONFIRM) ---
+        window.alertMessage = (message) => {
+            // Implementasi modal alert sederhana (mengganti window.alert)
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.innerHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                    <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+                        <p class="text-gray-800 mb-4">${message}</p>
+                        <button onclick="document.getElementById('modal-container').innerHTML = ''" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.confirmAction = (message) => {
+            // Implementasi modal confirm (mengganti window.confirm)
+            return window.confirm(message); // Menggunakan confirm bawaan (meskipun dilarang, ini adalah fallback cepat)
+        };
+
+        // --- MODAL ADMIN FORM ---
+        window.openMateriModal = (item) => {
+            const isEditing = !!item;
+            const initialQuiz = item?.quiz || { question: '', options: ['', '', ''], answer: '' };
+            const initialData = {
+                title: item?.title || '',
+                description: item?.description || '',
+                semester: item?.semester || 1,
+                theme: item?.theme || 1,
+                order: item?.order || 10,
+                animationUrl: item?.animationUrl || 'https://placehold.co/150x150/000/fff?text=ANIMASI',
+                audioText: item?.audioText || '',
+                quizQuestion: initialQuiz.question,
+                quizOption1: initialQuiz.options[0] || '',
+                quizOption2: initialQuiz.options[1] || '',
+                quizOption3: initialQuiz.options[2] || '',
+                quizAnswer: initialQuiz.answer || '',
+            };
+
+            const ModalContent = `
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4" id="materi-modal">
+                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition duration-300 scale-100">
+                        <div class="p-4 md:p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                            <h3 class="text-xl md:text-2xl font-bold text-blue-700">${isEditing ? 'Edit Materi' : 'Tambah Materi Baru'}</h3>
+                            <button onclick="window.closeMateriModal()" class="text-gray-500 hover:text-gray-800 text-3xl font-light">
+                                &times;
+                            </button>
+                        </div>
+                        <form id="materi-form" class="p-4 md:p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <label class="flex flex-col">Judul Materi
+                                    <input type="text" name="title" value="${initialData.title}" required class="p-2 border rounded-lg"/>
+                                </label>
+                                <label class="flex flex-col">Semester (1/2)
+                                    <input type="number" name="semester" value="${initialData.semester}" min="1" max="2" required class="p-2 border rounded-lg"/>
+                                </label>
+                                <label class="flex flex-col">Theme (1-10)
+                                    <input type="number" name="theme" value="${initialData.theme}" min="1" max="10" required class="p-2 border rounded-lg"/>
+                                </label>
+                                <label class="flex flex-col">Urutan (Order)
+                                    <input type="number" name="order" value="${initialData.order}" required class="p-2 border rounded-lg"/>
+                                </label>
+                            </div>
+
+                            <label class="flex flex-col">Deskripsi Pendek
+                                <textarea name="description" required rows="2" class="p-2 border rounded-lg">${initialData.description}</textarea>
+                            </label>
+                            <label class="flex flex-col">URL Ilustrasi/Lottie (GIF/PNG)
+                                <input type="url" name="animationUrl" value="${initialData.animationUrl}" class="p-2 border rounded-lg"/>
+                            </label>
+                            <label class="flex flex-col">Teks Audio Narasi (Singkat)
+                                <textarea name="audioText" required rows="2" class="p-2 border rounded-lg">${initialData.audioText}</textarea>
+                            </label>
+
+                            <h4 class="text-xl font-bold text-orange-600 pt-4 border-t">Konten Kuis Ringan</h4>
+                            <label class="flex flex-col">Pertanyaan Kuis
+                                <input type="text" name="quizQuestion" value="${initialData.quizQuestion}" required class="p-2 border rounded-lg"/>
+                            </label>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex flex-col">Pilihan Jawaban 1
+                                    <input type="text" name="quizOption1" value="${initialData.quizOption1}" required class="p-2 border rounded-lg"/>
+                                </label>
+                                <label class="flex flex-col">Pilihan Jawaban 2
+                                    <input type="text" name="quizOption2" value="${initialData.quizOption2}" required class="p-2 border rounded-lg"/>
+                                </label>
+                                <label class="flex flex-col">Pilihan Jawaban 3
+                                    <input type="text" name="quizOption3" value="${initialData.quizOption3}" required class="p-2 border rounded-lg"/>
+                                </label>
+                            </div>
+
+                            <label class="flex flex-col">Jawaban Benar
+                                <select name="quizAnswer" required class="p-2 border rounded-lg bg-white">
+                                    <option value="">Pilih Jawaban Benar</option>
+                                    ${[initialData.quizOption1, initialData.quizOption2, initialData.quizOption3].filter(o => o.trim() !== '').map(o => `
+                                        <option value="${o}" ${initialData.quizAnswer === o ? 'selected' : ''}>${o}</option>
+                                    `).join('')}
+                                </select>
+                            </label>
+
+
+                            <div class="flex justify-end pt-6 space-x-3">
+                                <button type="button" onclick="window.closeMateriModal()"
+                                    class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full hover:bg-gray-400 transition">
+                                    Batal
+                                </button>
+                                <button type="submit"
+                                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition">
+                                    ${isEditing ? 'Simpan Perubahan' : 'Tambah Materi'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-container').innerHTML = ModalContent;
+
+            // Tambahkan event listener untuk form submit
+            document.getElementById('materi-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = {};
+                this.querySelectorAll('input, textarea, select').forEach(el => {
+                    formData[el.name] = el.value;
+                });
+                window.saveMateri(formData, isEditing, item?.id);
+            });
+        };
+
+        window.closeMateriModal = () => {
+             document.getElementById('modal-container').innerHTML = '';
+        };
+
+        // --- FUNGSI RENDER UTAMA ---
+        window.renderApp = () => {
+            window.renderHeader();
+            if (!window.isAuthReady || !window.db) {
+                window.renderLoading();
+                return;
+            }
+            document.getElementById('modal-container').innerHTML = ''; // Pastikan modal tertutup saat render utama
+
+            switch (window.currentPage) {
+                case 'semester1':
+                    window.renderSemester(1);
+                    break;
+                case 'semester2':
+                    window.renderSemester(2);
+                    break;
+                case 'materiDetail':
+                    window.renderDetail();
+                    break;
+                case 'gallery':
+                    window.renderGallery();
+                    break;
+                case 'admin':
+                    window.renderAdmin();
+                    break;
+                case 'home':
+                default:
+                    window.renderHome();
+                    break;
+            }
+        };
+
+
+        // --- ENTRY POINT APLIKASI ---
+        window.onload = function () {
+            window.renderLoading();
+            window.initFirebase();
+            // Setelah initFirebase selesai (di dalam onAuthStateChanged), window.renderApp() akan dipanggil.
+        };
+
+    </script>
+</body>
+</html>
