@@ -1,961 +1,1721 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PJOK Seru Kelas 3 SD - Kurikulum Merdeka</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Phosphor Icons (for easy icons) -->
-    <script src="https://unpkg.com/phosphor-icons"></script>
-    <!-- Custom Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-sky': '#87CEEB', // Biru Langit
-                        'secondary-leaf': '#38A169', // Hijau Daun
-                        'accent-orange': '#FF8C42', // Oranye Lembut
-                        'bg-light': '#F8F9FA',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    keyframes: {
-                        bounceBall: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        },
-                        run: {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' },
-                        }
-                    },
-                    animation: {
-                        bounceBall: 'bounceBall 1s infinite alternate',
-                        run: 'run 2s linear infinite',
-                    }
-                }
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Pembelajaran PJOK Kelas 3</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100%;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(255, 182, 193, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-btn {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            color: #2d3748;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(168, 237, 234, 0.4);
+            font-size: 15px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.6);
+        }
+
+        .title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 2.8rem;
+            margin: 25px 0;
+            text-shadow: 3px 3px 6px rgba(255,255,255,0.8);
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-text {
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Chapter Grid */
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chapter-card {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            border-radius: 25px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 35px rgba(252, 182, 159, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 50px rgba(252, 182, 159, 0.5);
+        }
+
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.8s;
+        }
+
+        .chapter-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .chapter-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #e53e3e;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.7);
+        }
+
+        .chapter-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .chapter-icon {
+            font-size: 4.5rem;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffeef8, #e8f4fd);
+            margin: 3% auto;
+            padding: 35px;
+            border-radius: 30px;
+            width: 92%;
+            max-width: 900px;
+            max-height: 85%;
+            overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .close {
+            color: #e53e3e;
+            float: right;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: #c53030;
+            transform: scale(1.2);
+        }
+
+        /* Learning Styles */
+        .learning-styles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .style-card {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.3);
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+
+        .style-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(168, 237, 234, 0.5);
+        }
+
+        .style-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .style-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-question {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .quiz-option {
+            background: rgba(255,255,255,0.15);
+            border: 3px solid transparent;
+            padding: 18px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .quiz-option.selected {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+
+        .quiz-option.correct {
+            background: #48bb78;
+            border-color: #38a169;
+        }
+
+        .quiz-option.incorrect {
+            background: #f56565;
+            border-color: #e53e3e;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 35px;
+            border-radius: 25px;
+            margin-top: 30px;
+        }
+
+        .admin-form {
+            display: grid;
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.95);
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #718096;
+        }
+
+        .form-label {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 17px;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            padding: 18px 35px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 17px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+        }
+
+        /* Content Display */
+        .content-display {
+            background: rgba(255,255,255,0.85);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 25px 0;
+            line-height: 1.7;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .material-item {
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #ff6b6b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-12px);
+            }
+            60% {
+                transform: translateY(-6px);
             }
         }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        
-        /* Gaya dasar untuk elemen interaktif */
-        .btn-interact {
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-25px) rotate(180deg);
+            }
         }
-        .btn-interact:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
-        
-        /* Animasi Bu Siti */
-        .bu-siti-waving {
-            animation: wave 1.5s infinite alternate;
-            transform-origin: 75% 90%;
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .nav-buttons {
+                justify-content: center;
+            }
+            
+            .chapters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 8% auto;
+                width: 96%;
+                padding: 25px;
+            }
+            
+            .learning-styles {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header {
+                padding: 18px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .chapter-number {
+                font-size: 3rem;
+            }
+            
+            .chapter-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Loading States */
+        .loading {
             display: inline-block;
-        }
-        @keyframes wave {
-            0% { transform: rotate(0.0deg) }
-            10% { transform: rotate(14.0deg) }
-            20% { transform: rotate(-8.0deg) }
-            30% { transform: rotate(14.0deg) }
-            40% { transform: rotate(-4.0deg) }
-            50% { transform: rotate(10.0deg) }
-            60% { transform: rotate(0.0deg) }
-            100% { transform: rotate(0.0deg) }
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
         }
 
-        /* Styling for the animated icon container */
-        .animation-container {
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: linear-gradient(135deg, #FFEFBA, #FFFFFF);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background: #48bb78;
+            color: white;
+            padding: 18px;
             border-radius: 12px;
-            padding: 20px;
+            margin: 12px 0;
+            text-align: center;
         }
 
-        /* Gaya untuk modal */
-        .modal {
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            transition: opacity 0.3s ease-in-out;
+        .error-message {
+            background: #f56565;
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 12px 0;
+            text-align: center;
         }
 
+        /* Special styling for grade 3 */
+        .grade-indicator {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: #2d3748;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 0;
+        }
     </style>
-</head>
-<body class="bg-bg-light font-sans min-h-screen flex flex-col">
-
-    <!-- Navbar/Header -->
-    <header class="bg-primary-sky shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-white tracking-tight">PJOK Seru!</h1>
-            <nav id="navbar" class="space-x-4 flex items-center">
-                <!-- Navigasi akan diisi oleh JS -->
-            </nav>
-            <button id="menu-toggle" class="lg:hidden text-white p-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <i class="ph-list text-2xl"></i>
-            </button>
-        </div>
-        <!-- Mobile Menu (Hidden by default) -->
-        <div id="mobile-menu" class="hidden lg:hidden bg-sky-700 pb-2">
-            <!-- Nav items will be cloned here by JS -->
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main id="app-content" class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8"></main>
-
-    <!-- Footer -->
-    <footer class="bg-secondary-leaf text-white py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-            &copy; 2025 PJOK Interaktif Kelas 3 SD. Belajar sambil bermain!
-            <div id="user-info" class="mt-1 text-xs opacity-70"></div>
-        </div>
-    </footer>
-
-    <!-- Universal Modal Container -->
-    <div id="universal-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none">
-        <div class="bg-white rounded-xl p-6 shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-95">
-            <h3 id="modal-title" class="text-xl font-bold mb-4 text-primary-sky"></h3>
-            <div id="modal-body" class="text-gray-700 space-y-3"></div>
-            <div id="modal-footer" class="mt-6 flex justify-end space-x-3">
-                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150">Tutup</button>
-            </div>
-        </div>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container"><!-- Header -->
+   <div class="header">
+    <div class="nav-buttons"><button class="nav-btn" onclick="showHome()">🏠 Beranda</button> <button class="nav-btn" onclick="showHelp()">❓ Bantuan</button> <button class="nav-btn" onclick="showAdminLogin()">👨‍💼 Admin</button>
     </div>
-    
-    <!-- Firebase Imports -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global state and initialization
-        window.PJOK_APP = {
-            db: null,
-            auth: null,
-            userId: null,
-            materials: [],
-            currentView: 'home', // 'home', 'semester1', 'semester2', 'material', 'admin', 'admin-login', 'gallery'
-            currentMaterialId: null,
-            isAdmin: false, // FLAG BARU UNTUK ADMIN
-            ADMIN_PASSWORD: "PJOKAdmin2025" // KATA SANDI ADMIN
+    <div class="grade-indicator">
+     📚 Kelas 3 SD
+    </div>
+    <h1 class="title" id="site-title">Mahir PJOK Kelas 3! 🏃‍♂️⚽🤸‍♀️</h1>
+    <p class="welcome-text" id="welcome-message">Selamat datang siswa kelas 3! Mari tingkatkan kemampuan olahraga dengan variasi gerakan yang lebih menantang!</p>
+    <p class="welcome-text" id="teacher-name">Guru PJOK: Ibu Siti Nur Aisyah, S.Pd</p>
+   </div><!-- Main Content -->
+   <div id="main-content">
+    <div class="chapters-grid">
+     <div class="chapter-card" onclick="openChapter(1)">
+      <div class="chapter-icon">
+       🏃‍♂️
+      </div>
+      <div class="chapter-number">
+       1
+      </div>
+      <div class="chapter-title">
+       Variasi dan Kombinasi Gerak Dasar Lokomotor
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Menengah
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(2)">
+      <div class="chapter-icon">
+       🤸‍♀️
+      </div>
+      <div class="chapter-number">
+       2
+      </div>
+      <div class="chapter-title">
+       Variasi dan Kombinasi Gerak Dasar Nonlokomotor
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Menengah
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(3)">
+      <div class="chapter-icon">
+       ⚽
+      </div>
+      <div class="chapter-number">
+       3
+      </div>
+      <div class="chapter-title">
+       Variasi dan Kombinasi Gerak Dasar Manipulatif
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Menengah
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(4)">
+      <div class="chapter-icon">
+       🤸
+      </div>
+      <div class="chapter-number">
+       4
+      </div>
+      <div class="chapter-title">
+       Aktivitas Senam Lantai
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Lanjut
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(5)">
+      <div class="chapter-icon">
+       💃
+      </div>
+      <div class="chapter-number">
+       5
+      </div>
+      <div class="chapter-title">
+       Aktivitas Gerak Berirama
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Menengah
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(6)">
+      <div class="chapter-icon">
+       🏊‍♀️
+      </div>
+      <div class="chapter-number">
+       6
+      </div>
+      <div class="chapter-title">
+       Aktivitas dan Permainan Olahraga Air
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Lanjut
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(7)">
+      <div class="chapter-icon">
+       💪
+      </div>
+      <div class="chapter-number">
+       7
+      </div>
+      <div class="chapter-title">
+       Aktivitas dan Pengembangan Kebugaran Jasmani
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Lanjut
+      </div>
+     </div>
+     <div class="chapter-card" onclick="openChapter(8)">
+      <div class="chapter-icon">
+       🍎
+      </div>
+      <div class="chapter-number">
+       8
+      </div>
+      <div class="chapter-title">
+       Perilaku Hidup Sehat
+      </div>
+      <div class="difficulty-badge">
+       Tingkat Dasar
+      </div>
+     </div>
+    </div>
+   </div><!-- Chapter Modal -->
+   <div id="chapterModal" class="modal">
+    <div class="modal-content"><span class="close" onclick="closeModal()">×</span>
+     <h2 id="modal-title">Bab 1: Variasi dan Kombinasi Gerak Dasar Lokomotor</h2><!-- Learning Styles -->
+     <div class="learning-styles">
+      <div class="style-card" onclick="showContent('visual')">
+       <div class="style-icon">
+        👀
+       </div>
+       <div class="style-title">
+        Visual
+       </div>
+       <p>Lihat diagram dan demonstrasi</p>
+      </div>
+      <div class="style-card" onclick="showContent('auditory')">
+       <div class="style-icon">
+        👂
+       </div>
+       <div class="style-title">
+        Auditori
+       </div>
+       <p>Dengar instruksi detail</p>
+      </div>
+      <div class="style-card" onclick="showContent('kinesthetic')">
+       <div class="style-icon">
+        🤸‍♀️
+       </div>
+       <div class="style-title">
+        Kinestetik
+       </div>
+       <p>Praktik dengan variasi</p>
+      </div>
+     </div><!-- Content Display -->
+     <div id="content-display" class="content-display hidden">
+      <div id="content-text"></div>
+      <div id="custom-materials"></div>
+     </div><!-- Quiz Section -->
+     <div id="quiz-section" class="quiz-container hidden">
+      <h3>🧠 Kuis Pemahaman Kelas 3</h3>
+      <div id="quiz-content"></div><button class="btn" onclick="nextQuestion()" id="next-btn" style="display: none;">Soal Berikutnya</button> <button class="btn" onclick="showQuizResults()" id="finish-btn" style="display: none;">Lihat Hasil</button>
+     </div>
+    </div>
+   </div><!-- Admin Login Modal -->
+   <div id="adminLoginModal" class="modal">
+    <div class="modal-content"><span class="close" onclick="closeModal()">×</span>
+     <h2>🔐 Login Admin</h2>
+     <div class="admin-form">
+      <div class="form-group"><label class="form-label" style="color: #2d3748;">Password:</label> <input type="password" id="admin-password" class="form-input" placeholder="Masukkan password admin">
+      </div><button class="btn" onclick="adminLogin()">Login</button>
+      <div id="login-message"></div>
+     </div>
+    </div>
+   </div><!-- Admin Panel Modal -->
+   <div id="adminPanel" class="modal">
+    <div class="modal-content"><span class="close" onclick="closeModal()">×</span>
+     <h2>👨‍💼 Panel Admin - PJOK Kelas 3</h2><!-- Tab Navigation -->
+     <div style="display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap;"><button class="btn btn-secondary" onclick="showAdminTab('materials')" id="materials-tab">📚 Kelola Materi</button> <button class="btn btn-secondary" onclick="showAdminTab('quiz')" id="quiz-tab">❓ Kelola Soal Kuis</button>
+     </div><!-- Materials Panel -->
+     <div class="admin-panel" id="materials-panel">
+      <h3>Kelola Materi Pembelajaran PJOK Kelas 3</h3>
+      <div class="admin-form">
+       <div class="form-group"><label class="form-label">Bab:</label> <select id="admin-chapter" class="form-select"> <option value="1">Bab 1: Variasi dan Kombinasi Gerak Dasar Lokomotor</option> <option value="2">Bab 2: Variasi dan Kombinasi Gerak Dasar Nonlokomotor</option> <option value="3">Bab 3: Variasi dan Kombinasi Gerak Dasar Manipulatif</option> <option value="4">Bab 4: Aktivitas Senam Lantai</option> <option value="5">Bab 5: Aktivitas Gerak Berirama</option> <option value="6">Bab 6: Aktivitas dan Permainan Olahraga Air</option> <option value="7">Bab 7: Aktivitas dan Pengembangan Kebugaran Jasmani</option> <option value="8">Bab 8: Perilaku Hidup Sehat</option> </select>
+       </div>
+       <div class="form-group"><label class="form-label">Jenis Materi:</label> <select id="admin-type" class="form-select" onchange="toggleMediaFields()"> <option value="visual">Visual</option> <option value="auditory">Auditori</option> <option value="kinesthetic">Kinestetik</option> </select>
+       </div>
+       <div class="form-group"><label class="form-label">Judul Materi:</label> <input type="text" id="admin-title" class="form-input" placeholder="Masukkan judul materi">
+       </div>
+       <div class="form-group"><label class="form-label">Konten Materi:</label> <textarea id="admin-content" class="form-textarea" placeholder="Masukkan konten materi pembelajaran untuk kelas 3"></textarea>
+       </div>
+       <div class="form-group" id="image-group" style="display: none;"><label class="form-label">URL Gambar (Opsional):</label> <input type="url" id="admin-image" class="form-input" placeholder="https://contoh.com/gambar.jpg"> <small style="color: #e2e8f0; font-size: 12px; margin-top: 5px; display: block;"> Masukkan URL gambar yang valid untuk materi visual </small>
+       </div>
+       <div class="form-group" id="audio-group" style="display: none;"><label class="form-label">URL Audio (Opsional):</label> <input type="url" id="admin-audio" class="form-input" placeholder="https://contoh.com/audio.mp3"> <small style="color: #e2e8f0; font-size: 12px; margin-top: 5px; display: block;"> Masukkan URL audio yang valid untuk materi auditori </small>
+       </div>
+       <div style="display: flex; gap: 15px; flex-wrap: wrap;"><button class="btn" onclick="addMaterial()" id="add-btn"> <span class="loading hidden"></span> Tambah Materi </button> <button class="btn btn-secondary" onclick="loadMaterials()">Lihat Semua Materi</button>
+       </div>
+      </div>
+      <div id="admin-message"></div>
+      <div id="materials-list"></div>
+     </div><!-- Quiz Panel -->
+     <div class="admin-panel hidden" id="quiz-panel">
+      <h3>Kelola Soal Kuis PJOK Kelas 3</h3>
+      <div class="admin-form">
+       <div class="form-group"><label class="form-label">Bab:</label> <select id="quiz-chapter" class="form-select"> <option value="1">Bab 1: Variasi dan Kombinasi Gerak Dasar Lokomotor</option> <option value="2">Bab 2: Variasi dan Kombinasi Gerak Dasar Nonlokomotor</option> <option value="3">Bab 3: Variasi dan Kombinasi Gerak Dasar Manipulatif</option> <option value="4">Bab 4: Aktivitas Senam Lantai</option> <option value="5">Bab 5: Aktivitas Gerak Berirama</option> <option value="6">Bab 6: Aktivitas dan Permainan Olahraga Air</option> <option value="7">Bab 7: Aktivitas dan Pengembangan Kebugaran Jasmani</option> <option value="8">Bab 8: Perilaku Hidup Sehat</option> </select>
+       </div>
+       <div class="form-group"><label class="form-label">Pertanyaan:</label> <textarea id="quiz-question" class="form-textarea" placeholder="Masukkan pertanyaan kuis untuk siswa kelas 3"></textarea>
+       </div>
+       <div class="form-group"><label class="form-label">Pilihan A:</label> <input type="text" id="quiz-option-a" class="form-input" placeholder="Pilihan jawaban A">
+       </div>
+       <div class="form-group"><label class="form-label">Pilihan B:</label> <input type="text" id="quiz-option-b" class="form-input" placeholder="Pilihan jawaban B">
+       </div>
+       <div class="form-group"><label class="form-label">Pilihan C:</label> <input type="text" id="quiz-option-c" class="form-input" placeholder="Pilihan jawaban C">
+       </div>
+       <div class="form-group"><label class="form-label">Pilihan D:</label> <input type="text" id="quiz-option-d" class="form-input" placeholder="Pilihan jawaban D">
+       </div>
+       <div class="form-group"><label class="form-label">Jawaban Benar:</label> <select id="quiz-correct" class="form-select"> <option value="0">A</option> <option value="1">B</option> <option value="2">C</option> <option value="3">D</option> </select>
+       </div>
+       <div class="form-group"><label class="form-label">URL Gambar (Opsional):</label> <input type="url" id="quiz-image" class="form-input" placeholder="https://contoh.com/gambar.jpg"> <small style="color: #e2e8f0; font-size: 12px; margin-top: 5px; display: block;"> Masukkan URL gambar untuk soal (opsional) </small>
+       </div>
+       <div style="display: flex; gap: 15px; flex-wrap: wrap;"><button class="btn" onclick="addQuizQuestion()" id="add-quiz-btn"> <span class="loading hidden"></span> Tambah Soal </button> <button class="btn btn-secondary" onclick="loadQuizQuestions()">Lihat Semua Soal</button>
+       </div>
+      </div>
+      <div id="quiz-message"></div>
+      <div id="quiz-list"></div>
+     </div>
+    </div>
+   </div><!-- Help Modal -->
+   <div id="helpModal" class="modal">
+    <div class="modal-content"><span class="close" onclick="closeModal()">×</span>
+     <h2>❓ Bantuan - PJOK Kelas 3</h2>
+     <div class="content-display">
+      <h3>Cara Menggunakan Website PJOK Kelas 3:</h3>
+      <ul>
+       <li><strong>Pilih Bab:</strong> Klik pada kartu bab yang ingin dipelajari (ada 8 bab dengan tingkat kesulitan berbeda)</li>
+       <li><strong>Pilih Gaya Belajar:</strong> Pilih cara belajar yang paling cocok: 
+        <ul>
+         <li>👀 <strong>Visual:</strong> Belajar dengan melihat diagram dan demonstrasi</li>
+         <li>👂 <strong>Auditori:</strong> Belajar dengan mendengar instruksi detail</li>
+         <li>🤸‍♀️ <strong>Kinestetik:</strong> Belajar dengan praktik variasi gerakan</li>
+        </ul></li>
+       <li><strong>Kuis:</strong> Setelah belajar, kerjakan kuis untuk menguji pemahaman</li>
+       <li><strong>Admin:</strong> Guru dapat menambah, mengedit, atau menghapus materi</li>
+      </ul>
+      <h3>Materi PJOK Kelas 3 (Lebih Kompleks):</h3>
+      <ol>
+       <li><strong>Variasi dan Kombinasi Gerak Dasar Lokomotor:</strong> Kombinasi berjalan, berlari, melompat, dan meloncat</li>
+       <li><strong>Variasi dan Kombinasi Gerak Dasar Nonlokomotor:</strong> Kombinasi menekuk, memutar, mengayun dengan koordinasi</li>
+       <li><strong>Variasi dan Kombinasi Gerak Dasar Manipulatif:</strong> Kombinasi melempar, menangkap, menendang dengan teknik</li>
+       <li><strong>Aktivitas Senam Lantai:</strong> Gerakan senam lantai yang lebih kompleks</li>
+       <li><strong>Aktivitas Gerak Berirama:</strong> Gerak berirama dengan koordinasi yang lebih baik</li>
+       <li><strong>Aktivitas dan Permainan Olahraga Air:</strong> Permainan air dengan teknik dasar renang</li>
+       <li><strong>Aktivitas dan Pengembangan Kebugaran Jasmani:</strong> Program kebugaran yang lebih terstruktur</li>
+       <li><strong>Perilaku Hidup Sehat:</strong> Pemahaman yang lebih mendalam tentang hidup sehat</li>
+      </ol>
+      <h3>Tips Belajar untuk Kelas 3:</h3>
+      <ul>
+       <li>Pahami variasi dan kombinasi gerakan dengan baik</li>
+       <li>Praktikkan gerakan secara bertahap dari mudah ke sulit</li>
+       <li>Perhatikan koordinasi dan keseimbangan tubuh</li>
+       <li>Tanyakan pada guru jika ada gerakan yang sulit</li>
+       <li>Kerjakan kuis dengan teliti dan berpikir kritis</li>
+       <li>Selalu utamakan keselamatan dalam setiap aktivitas</li>
+      </ul>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Configuration object
+        const defaultConfig = {
+            site_title: "Mahir PJOK Kelas 3! 🏃‍♂️⚽🤸‍♀️",
+            welcome_message: "Selamat datang siswa kelas 3! Mari tingkatkan kemampuan olahraga dengan variasi gerakan yang lebih menantang!",
+            teacher_name: "Guru PJOK: Ibu Siti Nur Aisyah, S.Pd"
         };
 
-        // --- MANDATORY FIREBASE SETUP ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        setLogLevel('debug'); // Enable Firestore logs
+        // Global variables
+        let currentChapter = 1;
+        let currentQuizQuestion = 0;
+        let quizAnswers = [];
+        let isAdminLoggedIn = false;
+        let materials = [];
+        let quizQuestions = [];
 
-        // Function to initialize Firebase and Auth
-        async function initializeFirebase() {
-            try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    console.error("Firebase config is missing. Data persistence will not work.");
-                    // Simulate authenticated state for local development/preview
-                    PJOK_APP.userId = 'simulated-user';
-                    renderApp();
-                    return;
-                }
-
-                const app = initializeApp(firebaseConfig);
-                PJOK_APP.db = getFirestore(app);
-                PJOK_APP.auth = getAuth(app);
-                
-                // Sign in with custom token or anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(PJOK_APP.auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(PJOK_APP.auth);
-                }
-
-                onAuthStateChanged(PJOK_APP.auth, (user) => {
-                    if (user) {
-                        PJOK_APP.userId = user.uid;
-                        document.getElementById('user-info').textContent = `User ID: ${PJOK_APP.userId}`;
-                        setupRealtimeListener();
-                    } else {
-                        // Fallback if sign-in fails or user signs out
-                        PJOK_APP.userId = crypto.randomUUID();
-                        document.getElementById('user-info').textContent = `User ID (Anon): ${PJOK_APP.userId}`;
-                        setupRealtimeListener();
+        // Chapter data for Grade 3 (more complex content)
+        const chapters = {
+            1: {
+                title: "Variasi dan Kombinasi Gerak Dasar Lokomotor",
+                icon: "🏃‍♂️",
+                content: {
+                    visual: "Perhatikan variasi gerak lokomotor yang lebih kompleks! Variasi gerak lokomotor meliputi: berjalan dengan berbagai pola (zigzag, melingkar), berlari dengan perubahan arah dan kecepatan, melompat dengan satu atau dua kaki dalam berbagai pola, meloncat dengan kombinasi arah (maju, mundur, samping), dan merangkak dengan variasi gerakan. Kombinasi gerak adalah menggabungkan 2-3 gerakan menjadi satu rangkaian yang harmonis.",
+                    auditory: "Instruksi variasi gerak lokomotor: Pertama, berjalan 10 langkah maju, lalu 5 langkah ke samping kanan, dan 10 langkah mundur. Kedua, berlari pelan 15 meter, berhenti, lalu berlari cepat 10 meter. Ketiga, melompat 5 kali di tempat, lalu melompat maju 3 kali. Keempat, meloncat dengan kaki kanan 3 kali, lalu kaki kiri 3 kali, kemudian bergantian kanan-kiri 6 kali. Kelima, kombinasikan semua gerakan dalam satu rangkaian selama 3 menit.",
+                    kinesthetic: "Praktik variasi dan kombinasi gerak lokomotor! 1) Berjalan dalam pola zigzag 20 meter, 2) Berlari dengan perubahan kecepatan: pelan-cepat-pelan, 3) Melompat dalam pola kotak (4 sudut) masing-masing 5 kali, 4) Meloncat maju-mundur-samping kanan-samping kiri masing-masing 4 kali, 5) Kombinasi: berjalan 10 langkah + berlari 15 meter + melompat 5 kali + meloncat 8 kali, 6) Merangkak maju 10 meter dengan variasi kecepatan."
+                },
+                quiz: [
+                    {
+                        question: "Apa yang dimaksud dengan variasi gerak lokomotor?",
+                        options: ["Gerakan yang sama berulang-ulang", "Gerakan berpindah tempat dengan berbagai cara", "Gerakan di tempat saja", "Gerakan dengan alat"],
+                        correct: 1
+                    },
+                    {
+                        question: "Kombinasi gerak lokomotor adalah?",
+                        options: ["Satu gerakan saja", "Menggabungkan 2-3 gerakan menjadi rangkaian", "Gerakan yang sulit", "Gerakan tanpa aturan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Contoh variasi berjalan adalah?",
+                        options: ["Berjalan biasa saja", "Berjalan zigzag, melingkar, mundur", "Berjalan sambil tidur", "Berjalan dengan mata tertutup"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat melakukan kombinasi gerak, yang penting diperhatikan adalah?",
+                        options: ["Kecepatan saja", "Koordinasi dan keseimbangan", "Kekuatan saja", "Tidak perlu aturan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Perbedaan melompat dan meloncat dalam variasi gerak adalah?",
+                        options: ["Tidak ada perbedaan", "Melompat pakai dua kaki, meloncat pakai satu kaki", "Melompat lebih tinggi", "Meloncat lebih cepat"],
+                        correct: 1
                     }
-                    renderApp();
-                });
-
-            } catch (error) {
-                console.error("Error during Firebase initialization or sign-in:", error);
-                // Fallback for UI rendering
-                PJOK_APP.userId = crypto.randomUUID();
-                document.getElementById('user-info').textContent = `Error Init (Anon): ${PJOK_APP.userId}`;
-                renderApp();
-            }
-        }
-        
-        // --- FIRESTORE OPERATIONS ---
-        const COLLECTION_PATH = `artifacts/${appId}/public/data/pjok_materials`;
-
-        function setupRealtimeListener() {
-            if (!PJOK_APP.db) return;
-            
-            const q = collection(PJOK_APP.db, COLLECTION_PATH);
-            
-            onSnapshot(q, (snapshot) => {
-                const materials = [];
-                snapshot.forEach((doc) => {
-                    materials.push({ id: doc.id, ...doc.data() });
-                });
-                PJOK_APP.materials = materials.sort((a, b) => a.order - b.order); // Sort by order
-                renderApp(); 
-
-                // If current view is a material that got deleted/updated, rerender
-                if (PJOK_APP.currentView === 'material' && !PJOK_APP.materials.some(m => m.id === PJOK_APP.currentMaterialId)) {
-                    navigate('home');
-                }
-            }, (error) => {
-                console.error("Error listening to collection:", error);
-            });
-        }
-
-        async function addMaterial(data) {
-            if (!PJOK_APP.db) return console.error("Database not ready.");
-            try {
-                // Determine next order number
-                const maxOrder = PJOK_APP.materials.reduce((max, mat) => Math.max(max, mat.order || 0), 0);
-
-                const docRef = await addDoc(collection(PJOK_APP.db, COLLECTION_PATH), {
-                    ...data,
-                    order: maxOrder + 1, // Auto-increment order
-                    createdAt: new Date().toISOString()
-                });
-                showModal("Sukses", `Materi "${data.title}" berhasil ditambahkan!`);
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                showModal("Gagal", `Gagal menambahkan materi: ${error.message}`);
-            }
-        }
-
-        async function updateMaterial(id, data) {
-            if (!PJOK_APP.db) return console.error("Database not ready.");
-            try {
-                const docRef = doc(PJOK_APP.db, COLLECTION_PATH, id);
-                await updateDoc(docRef, data);
-                showModal("Sukses", `Materi "${data.title}" berhasil diperbarui.`);
-            } catch (error) {
-                console.error("Error updating document: ", error);
-                showModal("Gagal", `Gagal memperbarui materi: ${error.message}`);
-            }
-        }
-
-        async function deleteMaterial(id) {
-            if (!PJOK_APP.db) return console.error("Database not ready.");
-            try {
-                const docRef = doc(PJOK_APP.db, COLLECTION_PATH, id);
-                await deleteDoc(docRef);
-                showModal("Sukses", `Materi berhasil dihapus.`);
-            } catch (error) {
-                console.error("Error deleting document: ", error);
-                showModal("Gagal", `Gagal menghapus materi: ${error.message}`);
-            }
-        }
-        
-        // Expose functions to window scope for easy access from HTML elements
-        window.initializeFirebase = initializeFirebase;
-        window.addMaterial = addMaterial;
-        window.updateMaterial = updateMaterial;
-        window.deleteMaterial = deleteMaterial;
-
-        // Start initialization
-        window.addEventListener('load', initializeFirebase);
-    </script>
-
-    <!-- Main Application Logic (Vanilla JS) -->
-    <script>
-        // --- NAVIGATION AND VIEW MANAGEMENT ---
-
-        function navigate(view, id = null) {
-            if (view === 'material' && id) {
-                PJOK_APP.currentMaterialId = id;
-            } else {
-                PJOK_APP.currentMaterialId = null;
-            }
-            PJOK_APP.currentView = view;
-            window.location.hash = view + (id ? `/${id}` : '');
-            renderApp();
-        }
-        window.navigate = navigate; // Expose to global scope
-
-        // Handle URL hash changes for navigation
-        window.addEventListener('hashchange', () => {
-            const hash = window.location.hash.slice(1);
-            const [view, id] = hash.split('/');
-            if (view) {
-                PJOK_APP.currentView = view;
-                PJOK_APP.currentMaterialId = id || null;
-                renderApp();
-            } else {
-                PJOK_APP.currentView = 'home';
-                PJOK_APP.currentMaterialId = null;
-                renderApp();
-            }
-        });
-
-        function renderApp() {
-            renderNav();
-            const content = document.getElementById('app-content');
-            
-            // Show loading if data is not ready
-            if (!PJOK_APP.userId) {
-                content.innerHTML = renderLoading();
-                return;
-            }
-
-            // --- PROTEKSI ADMIN PAGE ---
-            if (PJOK_APP.currentView === 'admin' && !PJOK_APP.isAdmin) {
-                PJOK_APP.currentView = 'admin-login';
-            }
-            // ---------------------------
-
-            // Determine content based on current view
-            switch (PJOK_APP.currentView) {
-                case 'semester1':
-                case 'semester2':
-                    content.innerHTML = renderSemesterPage(PJOK_APP.currentView);
-                    break;
-                case 'material':
-                    content.innerHTML = renderMaterialPage(PJOK_APP.currentMaterialId);
-                    break;
-                case 'admin':
-                    content.innerHTML = renderAdminPage();
-                    break;
-                case 'admin-login': // HALAMAN LOGIN BARU
-                    content.innerHTML = renderAdminLoginPage();
-                    break;
-                case 'gallery':
-                    content.innerHTML = renderGalleryPage();
-                    break;
-                case 'home':
-                default:
-                    content.innerHTML = renderHomePage();
-                    break;
-            }
-        }
-        window.renderApp = renderApp; // Expose to global scope for initial load
-
-        function renderNav() {
-            // Cek status admin
-            const isAdmin = PJOK_APP.isAdmin;
-
-            const views = [
-                { name: 'Beranda', view: 'home' },
-                { name: 'Semester 1', view: 'semester1' },
-                { name: 'Semester 2', view: 'semester2' },
-                { name: 'Galeri Ilustrasi', view: 'gallery' },
-            ];
-            
-            // Tambahkan menu Admin/Login berdasarkan status
-            if (isAdmin) {
-                views.push({ name: 'Manajemen Materi', view: 'admin' });
-            } else {
-                views.push({ name: 'Login Admin', view: 'admin-login' });
-            }
-
-            const navContainer = document.getElementById('navbar');
-            const mobileContainer = document.getElementById('mobile-menu');
-
-            navContainer.innerHTML = '';
-            mobileContainer.innerHTML = '';
-
-            views.forEach(item => {
-                const isActive = PJOK_APP.currentView === item.view;
-                const baseClasses = 'px-3 py-2 rounded-full font-semibold transition duration-200 text-white';
-                const activeClasses = 'bg-accent-orange shadow-md';
-                const inactiveClasses = 'hover:bg-sky-600';
-
-                const button = `
-                    <button onclick="navigate('${item.view}')" class="${baseClasses} ${isActive ? activeClasses : inactiveClasses}">
-                        ${item.name}
-                    </button>
-                `;
-                
-                // Desktop Nav
-                navContainer.innerHTML += button;
-
-                // Mobile Nav (using simplified classes for full-width buttons)
-                const mobileButton = `
-                    <button onclick="navigate('${item.view}'); document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-left px-4 py-2 text-sm text-white ${isActive ? 'bg-accent-orange' : 'hover:bg-sky-500'}">
-                        ${item.name}
-                    </button>
-                `;
-                mobileContainer.innerHTML += mobileButton;
-            });
-
-            // Toggle mobile menu
-            document.getElementById('menu-toggle').onclick = () => {
-                document.getElementById('mobile-menu').classList.toggle('hidden');
-            };
-        }
-
-        // --- UI COMPONENTS (RENDERING) ---
-
-        function renderLoading() {
-            return `
-                <div class="text-center py-20">
-                    <i class="ph-circle-notch animate-spin text-5xl text-primary-sky"></i>
-                    <p class="mt-4 text-gray-600 font-medium">Memuat data dari perpustakaan PJOK...</p>
-                    <p class="text-sm text-gray-500">Mohon tunggu sebentar.</p>
-                </div>
-            `;
-        }
-
-        function getIllustration(type) {
-            const illustrations = {
-                'lokomotor': { emoji: '🏃‍♂️💨', text: 'Gerak Berpindah Tempat' },
-                'nonlokomotor': { emoji: '🤸‍♀️🧘', text: 'Gerak di Tempat' },
-                'manipulatif': { emoji: '🏀⚽️', text: 'Gerak dengan Benda' },
-                'tradisional': { emoji: '🪅🪁', text: 'Permainan Seru' },
-                'kebugaran': { emoji: '💪🍎', text: 'Badan Sehat' },
-                'air': { emoji: '🏊‍♂️💦', text: 'Aktivitas Air' },
-                'senam': { emoji: '👯‍♀️🎶', text: 'Senam & Tari' },
-                'kerjasama': { emoji: '🤝🧑‍🤝‍🧑', text: 'Ayo Bekerja Sama' },
-                'sehat': { emoji: '🛌🥗', text: 'Pola Hidup Sehat' },
-                'sportivitas': { emoji: '🏅💖', text: 'Sportif & Hebat' },
-            };
-            const defaultIllu = { emoji: '📚✨', text: 'Materi PJOK' };
-            return illustrations[type] || defaultIllu;
-        }
-
-        function renderCard(material) {
-            const illu = getIllustration(material.animationType);
-            return `
-                <div onclick="navigate('material', '${material.id}')" 
-                     class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transform hover:scale-[1.02] transition duration-300 cursor-pointer border-t-4 border-accent-orange h-full flex flex-col justify-between">
-                    <div>
-                        <div class="text-5xl text-center mb-4">${illu.emoji}</div>
-                        <h3 class="text-xl font-extrabold text-gray-800 mb-2">${material.title}</h3>
-                        <p class="text-sm text-gray-600">${material.narration.substring(0, 80)}...</p>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <span class="text-xs font-bold text-accent-orange bg-orange-100 px-3 py-1 rounded-full">${material.theme}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderHomePage() {
-            return `
-                <div class="text-center py-10 bg-white rounded-xl shadow-xl border-b-4 border-secondary-leaf">
-                    <div class="text-6xl mb-4 bu-siti-waving inline-block">👋</div>
-                    <h2 class="text-4xl font-bold text-secondary-leaf">Selamat Datang, Anak Hebat!</h2>
-                    <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
-                        Saya Bu Siti, guru PJOK kalian. Ayo kita jelajahi dunia gerak, permainan seru, dan cara menjaga tubuh agar selalu sehat dan kuat!
-                    </p>
-                    
-                    <!-- Animasi Cuaca Ceria -->
-                    <div class="my-8 flex justify-center space-x-8">
-                        <div class="text-6xl text-yellow-500 animate-pulse">☀️</div>
-                        <div class="text-4xl text-blue-400 animate-bounceBall" style="animation-duration: 2s;">⚽</div>
-                        <div class="text-6xl text-green-600">🌳</div>
-                    </div>
-
-                    <button onclick="navigate('semester1')"
-                        class="mt-8 px-10 py-4 bg-accent-orange text-white font-extrabold text-xl rounded-full btn-interact hover:bg-orange-600">
-                        Mulai Belajar Sekarang! <i class="ph-arrow-right ml-2"></i>
-                    </button>
-                    
-                    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                        ${renderShortcutCard('Semester 1', 'semester1', 'Berlari, melompat, dan melempar! Coba Tema 1 sampai 5.')}
-                        ${renderShortcutCard('Semester 2', 'semester2', 'Aktivitas air, senam ceria, dan kerja sama tim. Coba Tema 6 sampai 10.')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderShortcutCard(title, view, description) {
-            return `
-                <div onclick="navigate('${view}')" class="bg-primary-sky/10 p-5 rounded-lg text-left cursor-pointer hover:bg-primary-sky/20 transition duration-150">
-                    <h3 class="font-bold text-xl text-primary-sky flex items-center">
-                        <i class="ph-folder-simple-open mr-2"></i> ${title}
-                    </h3>
-                    <p class="text-sm text-gray-700 mt-1">${description}</p>
-                </div>
-            `;
-        }
-
-        function renderSemesterPage(semester) {
-            const isS1 = semester === 'semester1';
-            const title = isS1 ? 'Materi Semester 1: Gerak Dasar dan Permainan' : 'Materi Semester 2: Kebugaran dan Pola Hidup Sehat';
-            // Materials are sorted by 'order' in the listener
-            const filteredMaterials = PJOK_APP.materials.filter(m => {
-                const order = parseInt(m.order, 10);
-                return isS1 ? order >= 1 && order <= 5 : order >= 6 && order <= 10;
-            });
-
-            return `
-                <div class="pb-10">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-6 border-b-4 border-accent-orange/50 pb-2">${title}</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        ${filteredMaterials.length > 0 ? filteredMaterials.map(renderCard).join('') : `<p class="md:col-span-3 text-gray-500 italic">Belum ada materi untuk semester ini.</p>`}
-                    </div>
-                    <button onclick="navigate('home')" class="mt-8 px-6 py-3 bg-primary-sky text-white font-bold rounded-full btn-interact hover:bg-sky-600 flex items-center">
-                        <i class="ph-house-line mr-2"></i> Kembali ke Beranda
-                    </button>
-                </div>
-            `;
-        }
-        
-        // --- MATERIAL PAGE RENDERING ---
-
-        function renderMaterialPage(id) {
-            const material = PJOK_APP.materials.find(m => m.id === id);
-            if (!material) {
-                return `
-                    <div class="text-center py-20">
-                        <h2 class="text-3xl text-red-500">Materi Tidak Ditemukan!</h2>
-                        <p class="mt-2 text-gray-600">Mungkin materi ini sudah dihapus oleh guru.</p>
-                        <button onclick="navigate('home')" class="mt-6 px-6 py-3 bg-primary-sky text-white font-bold rounded-full btn-interact">
-                            Kembali ke Beranda
-                        </button>
-                    </div>
-                `;
-            }
-
-            const illu = getIllustration(material.animationType);
-
-            return `
-                <div class="bg-white rounded-xl shadow-2xl p-6 lg:p-10">
-                    <button onclick="navigate('semester${material.order <= 5 ? 1 : 2}')" class="text-primary-sky font-semibold mb-4 flex items-center hover:underline">
-                        <i class="ph-arrow-left mr-2"></i> Kembali ke Daftar ${material.theme}
-                    </button>
-                    
-                    <h1 class="text-4xl font-extrabold text-accent-orange mb-4">${material.title}</h1>
-                    <p class="text-lg text-gray-700 mb-6 italic border-l-4 border-secondary-leaf pl-4">${material.narration}</p>
-
-                    <!-- Animasi Konten -->
-                    <div class="animation-container mb-8">
-                        <div id="material-animation" class="text-9xl text-center transform transition-transform duration-500 ease-in-out">
-                            ${illu.emoji}
-                        </div>
-                        <div id="animation-text" class="absolute top-5 right-5 text-gray-600 font-bold bg-white/80 p-2 rounded-lg shadow-sm">
-                            ${illu.text}
-                        </div>
-                    </div>
-                    
-                    <!-- Tombol Interaktif -->
-                    <div class="flex flex-wrap gap-4 mb-8">
-                        <button onclick="showAnimation('${illu.emoji}', '${illu.text}')" class="btn-interact bg-primary-sky text-white px-6 py-3 rounded-full font-bold flex items-center hover:bg-sky-600">
-                            <i class="ph-play-circle-fill mr-2 text-xl"></i> Lihat Gerak
-                        </button>
-                        <button onclick="playAudioSimulation('${material.description}')" class="btn-interact bg-secondary-leaf text-white px-6 py-3 rounded-full font-bold flex items-center hover:bg-green-600">
-                            <i class="ph-speaker-high-fill mr-2 text-xl"></i> Dengar Penjelasan
-                        </button>
-                        <button onclick="startQuiz('${material.title}', ${JSON.stringify(material.keywords || [])})" class="btn-interact bg-accent-orange text-white px-6 py-3 rounded-full font-bold flex items-center hover:bg-orange-600">
-                            <i class="ph-puzzle-piece-fill mr-2 text-xl"></i> Latihan Yuk!
-                        </button>
-                    </div>
-
-                    <!-- Deskripsi Materi -->
-                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-3">Apa yang Kita Pelajari?</h3>
-                        <p class="text-gray-700 whitespace-pre-wrap">${material.description}</p>
-                    </div>
-                    
-                </div>
-            `;
-        }
-
-        // --- INTERACTIVE FEATURES LOGIC ---
-
-        function showAnimation(emoji, text) {
-            const animElement = document.getElementById('material-animation');
-            const textElement = document.getElementById('animation-text');
-            
-            // Simple animation sequence (bounce/scale effect)
-            animElement.classList.add('animate-ping', 'scale-110');
-            setTimeout(() => {
-                animElement.classList.remove('animate-ping', 'scale-110');
-            }, 1000);
-
-            showModal("Lihat Gerak", 
-                `<div class="text-center">
-                    <div class="text-8xl my-4">${emoji}</div>
-                    <p class="text-xl font-bold text-primary-sky">${text}</p>
-                    <p class="mt-2 text-gray-600">Bayangkan dirimu melakukan gerakan ini! Coba praktikkan di rumah, ya!</p>
-                </div>`
-            );
-        }
-        window.showAnimation = showAnimation;
-
-        function playAudioSimulation(description) {
-            // Since we cannot reliably play dynamic audio without specific files, 
-            // we simulate the action and display the text the "teacher" would say.
-            showModal("🗣️ Dengar Penjelasan Bu Siti", 
-                `<div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <p class="italic text-gray-700">"(Suara Bu Siti):</p>
-                    <p class="mt-2 text-lg font-medium text-gray-800">${description}</p>
-                </div>
-                <p class="mt-4 text-sm text-gray-500">Simulasi audio berhasil. Anda dapat menambahkan tautan audio MP3 pada materi di panel admin.</p>`
-            );
-        }
-        window.playAudioSimulation = playAudioSimulation;
-
-        function startQuiz(title, keywords) {
-            if (keywords.length === 0) {
-                 showModal("Latihan Yuk!", `<p>Wah, kuis untuk materi ${title} belum tersedia. Coba lagi nanti ya!</p>`);
-                 return;
-            }
-
-            const promptWord = keywords[Math.floor(Math.random() * keywords.length)];
-            const options = ['Berlari', 'Melompat', 'Mengayun', 'Menangkap', 'Istirahat', 'Keseimbangan'].filter(w => w.toLowerCase() !== promptWord.toLowerCase());
-            
-            // Get 3 random unique incorrect options + 1 correct option
-            while (options.length > 3) options.splice(Math.floor(Math.random() * options.length), 1);
-            
-            const quizOptions = [...options, promptWord];
-            quizOptions.sort(() => Math.random() - 0.5); // Shuffle
-
-            let quizContent = `
-                <p class="text-lg font-semibold mb-4">Gerakan apa yang berhubungan dengan kata kunci <span class="text-accent-orange font-extrabold text-2xl">"${promptWord.toUpperCase()}"</span>?</p>
-                <div class="grid grid-cols-2 gap-4">
-            `;
-            
-            quizOptions.forEach(option => {
-                const isCorrect = option.toLowerCase() === promptWord.toLowerCase();
-                quizContent += `
-                    <button onclick="checkAnswer(this, ${isCorrect}, '${promptWord}')" class="quiz-option p-4 bg-primary-sky text-white font-bold rounded-lg hover:bg-sky-600 transition duration-150 btn-interact">
-                        ${option}
-                    </button>
-                `;
-            });
-
-            quizContent += `</div><div id="quiz-feedback" class="mt-4 font-bold"></div>`;
-
-            showModal(`Latihan: ${title}`, quizContent, false, 'Selesai');
-        }
-        window.startQuiz = startQuiz;
-
-        function checkAnswer(button, isCorrect, correctWord) {
-            const feedback = document.getElementById('quiz-feedback');
-            document.querySelectorAll('.quiz-option').forEach(btn => btn.disabled = true);
-            
-            if (isCorrect) {
-                button.classList.add('bg-secondary-leaf', 'border-4', 'border-green-800');
-                feedback.innerHTML = '<span class="text-secondary-leaf text-2xl">🎉 Hebat! Kamu Benar!</span>';
-                // Simulate score update
-                setTimeout(() => closeModal(), 2000);
-            } else {
-                button.classList.add('bg-red-500', 'border-4', 'border-red-800');
-                feedback.innerHTML = '<span class="text-red-500 text-2xl">😢 Aduh, Kurang Tepat. Jawaban benar: ' + correctWord + '</span>';
-                document.querySelectorAll('.quiz-option').forEach(btn => {
-                    if (btn.textContent.trim().toLowerCase() === correctWord.toLowerCase()) {
-                        btn.classList.add('border-4', 'border-green-500'); // Highlight correct answer
+                ]
+            },
+            2: {
+                title: "Variasi dan Kombinasi Gerak Dasar Nonlokomotor",
+                icon: "🤸‍♀️",
+                content: {
+                    visual: "Lihat variasi gerak nonlokomotor yang lebih kompleks! Variasi gerak nonlokomotor meliputi: menekuk dan meluruskan dengan berbagai sudut, memutar badan dengan berbagai arah dan kecepatan, mengayun lengan dengan pola berbeda, membungkuk dengan variasi kedalaman, dan meregangkan dengan berbagai posisi. Kombinasi gerak adalah menggabungkan beberapa gerakan nonlokomotor menjadi satu rangkaian yang indah dan terkoordinasi.",
+                    auditory: "Cara melakukan variasi gerak nonlokomotor: Pertama, menekuk siku 90 derajat, tahan 5 detik, lalu luruskan. Kedua, memutar badan ke kanan 3 kali perlahan, lalu ke kiri 3 kali. Ketiga, mengayun lengan ke depan-belakang 8 kali, lalu ke samping 8 kali. Keempat, membungkuk 45 derajat tahan 3 detik, lalu 90 derajat tahan 3 detik. Kelima, kombinasikan: tekuk siku + putar badan + ayun lengan + bungkuk dalam satu rangkaian selama 2 menit.",
+                    kinesthetic: "Mari praktik variasi dan kombinasi gerak nonlokomotor! 1) Menekuk dan meluruskan: siku, lutut, pinggang masing-masing 10 kali, 2) Memutar: kepala, bahu, pinggang, pergelangan tangan masing-masing 8 kali, 3) Mengayun: lengan depan-belakang, samping, melingkar masing-masing 12 kali, 4) Membungkuk: ringan, sedang, dalam masing-masing 6 kali, 5) Kombinasi lengkap: semua gerakan dalam satu rangkaian 4 menit, 6) Peregangan akhir seluruh tubuh 3 menit."
+                },
+                quiz: [
+                    {
+                        question: "Gerak nonlokomotor adalah gerakan yang?",
+                        options: ["Berpindah tempat", "Tidak berpindah tempat", "Menggunakan alat", "Dilakukan berpasangan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Variasi dalam gerak nonlokomotor berarti?",
+                        options: ["Gerakan yang sama", "Gerakan dengan berbagai cara dan pola", "Gerakan yang sulit", "Gerakan yang cepat"],
+                        correct: 1
+                    },
+                    {
+                        question: "Contoh kombinasi gerak nonlokomotor adalah?",
+                        options: ["Hanya menekuk siku", "Menekuk siku + putar badan + ayun lengan", "Berdiri diam", "Berlari di tempat"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat memutar badan, gerakan harus dilakukan?",
+                        options: ["Secepat mungkin", "Perlahan dan terkontrol", "Sambil melompat", "Dengan mata tertutup"],
+                        correct: 1
+                    },
+                    {
+                        question: "Manfaat variasi gerak nonlokomotor adalah?",
+                        options: ["Membuat pusing", "Melatih kelenturan dan koordinasi", "Membuat lelah", "Tidak ada manfaat"],
+                        correct: 1
                     }
-                });
-                setTimeout(() => closeModal(), 3000);
+                ]
+            },
+            3: {
+                title: "Variasi dan Kombinasi Gerak Dasar Manipulatif",
+                icon: "⚽",
+                content: {
+                    visual: "Perhatikan variasi gerak manipulatif yang lebih terampil! Variasi gerak manipulatif meliputi: melempar dengan berbagai teknik (atas, bawah, samping), menangkap dari berbagai arah dan ketinggian, menendang dengan berbagai bagian kaki, memantulkan dengan pola berbeda, dan menggelindingkan dengan target yang tepat. Kombinasi gerak adalah menggabungkan beberapa keterampilan manipulatif dalam satu rangkaian yang mengalir.",
+                    auditory: "Teknik variasi gerak manipulatif: Pertama, lempar bola ke atas dengan tangan kanan, tangkap dengan kedua tangan, ulangi 10 kali. Kedua, lempar bola ke dinding, tangkap setelah memantul 1 kali, lakukan 15 kali. Ketiga, tendang bola dengan kaki bagian dalam ke target, lakukan 12 kali. Keempat, pantulkan bola dengan tangan kanan 10 kali, lalu tangan kiri 10 kali. Kelima, kombinasi: lempar-tangkap-tendang-pantul dalam satu rangkaian selama 5 menit.",
+                    kinesthetic: "Praktik variasi dan kombinasi gerak manipulatif! 1) Lempar tangkap bola: atas-bawah-samping masing-masing 15 kali, 2) Tendang bola: kaki dalam, luar, punggung kaki masing-masing 12 kali, 3) Pantulkan bola: satu tangan, dua tangan, bergantian masing-masing 20 kali, 4) Gelindingkan bola ke target jarak 5 meter sebanyak 10 kali, 5) Kombinasi lengkap: lempar ke atas + tangkap + tendang ke dinding + tangkap pantulan + pantulkan 10 kali, 6) Permainan kombinasi dengan teman 10 menit."
+                },
+                quiz: [
+                    {
+                        question: "Gerak manipulatif adalah gerakan yang?",
+                        options: ["Tanpa alat", "Menggunakan atau memanipulasi benda", "Di tempat saja", "Berpindah tempat"],
+                        correct: 1
+                    },
+                    {
+                        question: "Variasi dalam melempar bola meliputi?",
+                        options: ["Hanya lempar ke atas", "Lempar atas, bawah, samping dengan berbagai teknik", "Lempar sekuat tenaga", "Lempar dengan mata tertutup"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat menangkap bola dari berbagai arah, yang penting adalah?",
+                        options: ["Kecepatan", "Koordinasi mata dan tangan", "Kekuatan", "Tinggi badan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Kombinasi gerak manipulatif yang baik harus?",
+                        options: ["Cepat saja", "Terkoordinasi dan mengalir", "Menggunakan satu tangan", "Dilakukan sambil berlari"],
+                        correct: 1
+                    },
+                    {
+                        question: "Bagian kaki yang paling tepat untuk menendang bola dengan akurat adalah?",
+                        options: ["Ujung kaki", "Kaki bagian dalam", "Tumit", "Punggung kaki bagian atas"],
+                        correct: 1
+                    }
+                ]
+            },
+            4: {
+                title: "Aktivitas Senam Lantai",
+                icon: "🤸",
+                content: {
+                    visual: "Lihat gerakan senam lantai yang lebih kompleks! Senam lantai untuk kelas 3 meliputi: berguling ke depan dengan teknik yang benar, berguling ke belakang (dengan bantuan), sikap lilin dengan keseimbangan, kayang sederhana, berdiri dengan satu kaki (balance), dan rangkaian gerakan senam yang terkoordinasi. Setiap gerakan memerlukan kelenturan, kekuatan, dan keseimbangan yang baik.",
+                    auditory: "Teknik senam lantai yang aman: Pertama, berguling ke depan - duduk, tekuk kepala ke dada, dorong dengan kaki, guling perlahan. Kedua, sikap lilin - berbaring, angkat kaki ke atas, tahan dengan tangan di pinggang. Ketiga, kayang sederhana - berbaring, tekuk lutut, angkat pinggul. Keempat, balance satu kaki - berdiri tegak, angkat satu kaki, tahan 10 detik. Kelima, rangkaian - gabungkan semua gerakan dengan transisi yang halus.",
+                    kinesthetic: "Praktik senam lantai dengan aman! 1) Pemanasan: peregangan seluruh tubuh 5 menit, 2) Berguling ke depan: latihan duduk-guling 10 kali (dengan bantuan guru), 3) Sikap lilin: berbaring, angkat kaki, tahan 15 detik, ulangi 5 kali, 4) Kayang sederhana: berbaring, angkat pinggul, tahan 8 detik, ulangi 6 kali, 5) Balance: berdiri satu kaki kanan 15 detik, kiri 15 detik, ulangi 4 kali, 6) Rangkaian senam: kombinasi semua gerakan 8 menit, 7) Pendinginan: relaksasi dan peregangan 5 menit."
+                },
+                quiz: [
+                    {
+                        question: "Hal terpenting dalam senam lantai adalah?",
+                        options: ["Kecepatan", "Keselamatan dan teknik yang benar", "Kekuatan saja", "Tidak perlu aturan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat berguling ke depan, posisi kepala harus?",
+                        options: ["Tegak", "Ditekuk ke dada", "Diangkat tinggi", "Miring ke samping"],
+                        correct: 1
+                    },
+                    {
+                        question: "Sikap lilin bermanfaat untuk melatih?",
+                        options: ["Kecepatan lari", "Keseimbangan dan kekuatan perut", "Lompatan", "Lempar tangkap"],
+                        correct: 1
+                    },
+                    {
+                        question: "Sebelum melakukan senam lantai, kita harus?",
+                        options: ["Langsung berguling", "Pemanasan dan peregangan", "Makan banyak", "Minum air dingin"],
+                        correct: 1
+                    },
+                    {
+                        question: "Kayang sederhana melatih?",
+                        options: ["Kecepatan", "Kelenturan punggung dan kekuatan lengan", "Lompatan", "Keseimbangan kepala"],
+                        correct: 1
+                    }
+                ]
+            },
+            5: {
+                title: "Aktivitas Gerak Berirama",
+                icon: "💃",
+                content: {
+                    visual: "Perhatikan gerak berirama yang lebih terkoordinasi! Gerak berirama kelas 3 meliputi: langkah dasar dengan variasi pola, ayunan lengan yang sinkron dengan musik, gerakan kepala dan bahu mengikuti irama, kombinasi gerakan seluruh tubuh, dan koreografi sederhana dengan teman. Setiap gerakan harus selaras dengan tempo dan dinamika musik.",
+                    auditory: "Teknik gerak berirama yang baik: Pertama, dengarkan musik dengan seksama, rasakan ketukannya. Kedua, mulai dengan langkah dasar: kanan-kiri-kanan-kiri sesuai ketukan. Ketiga, tambahkan ayunan lengan: ke atas saat langkah kanan, ke bawah saat langkah kiri. Keempat, gerakkan kepala dan bahu mengikuti dinamika musik. Kelima, kombinasikan semua gerakan menjadi satu kesatuan yang harmonis selama 4 menit.",
+                    kinesthetic: "Mari bergerak berirama dengan koordinasi! 1) Dengarkan musik dan tepuk tangan mengikuti irama 3 menit, 2) Langkah dasar: maju-mundur, samping kanan-kiri masing-masing 16 ketukan, 3) Ayunan lengan: atas-bawah, samping-tengah masing-masing 16 kali, 4) Gerakan kepala: kanan-kiri, atas-bawah mengikuti musik 2 menit, 5) Kombinasi lengkap: langkah + ayunan + gerakan kepala 5 menit, 6) Koreografi berpasangan dengan teman 8 menit, 7) Penampilan kelompok dengan musik favorit 6 menit."
+                },
+                quiz: [
+                    {
+                        question: "Gerak berirama yang baik harus?",
+                        options: ["Cepat saja", "Selaras dengan irama musik", "Tidak perlu musik", "Asal bergerak"],
+                        correct: 1
+                    },
+                    {
+                        question: "Hal pertama yang harus dilakukan dalam gerak berirama adalah?",
+                        options: ["Langsung menari", "Mendengarkan dan merasakan irama musik", "Berteriak", "Melompat tinggi"],
+                        correct: 1
+                    },
+                    {
+                        question: "Koordinasi dalam gerak berirama berarti?",
+                        options: ["Gerakan asal-asalan", "Gerakan seluruh tubuh yang harmonis", "Hanya gerakan kaki", "Gerakan yang cepat"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat bergerak berirama bersama teman, yang penting adalah?",
+                        options: ["Bergerak sendiri-sendiri", "Kompak dan sinkron", "Berlomba siapa tercepat", "Tidak perlu memperhatikan teman"],
+                        correct: 1
+                    },
+                    {
+                        question: "Manfaat gerak berirama adalah?",
+                        options: ["Membuat pusing", "Melatih koordinasi dan rasa musik", "Membuat lelah", "Tidak ada manfaat"],
+                        correct: 1
+                    }
+                ]
+            },
+            6: {
+                title: "Aktivitas dan Permainan Olahraga Air",
+                icon: "🏊‍♀️",
+                content: {
+                    visual: "Lihat aktivitas air yang lebih menantang! Olahraga air kelas 3 meliputi: gerakan dasar renang (mengapung, meluncur), koordinasi gerakan kaki dan tangan di air, permainan air yang terstruktur, teknik pernapasan di air, dan aktivitas air yang melatih keberanian. Semua aktivitas dilakukan dengan pengawasan ketat dan peralatan keselamatan lengkap.",
+                    auditory: "Teknik dasar olahraga air yang aman: Pertama, belajar mengapung - rileks, tarik napas dalam, biarkan tubuh terapung. Kedua, meluncur - dorong dinding kolam, luruskan tubuh, meluncur sejauh mungkin. Ketiga, gerakan kaki - pegang pinggir kolam, gerakkan kaki naik-turun. Keempat, koordinasi - gabungkan gerakan kaki dan tangan secara perlahan. Kelima, pernapasan - latih menahan napas dan mengeluarkan napas di dalam air.",
+                    kinesthetic: "Praktik olahraga air dengan aman! (Selalu dengan pengawasan) 1) Adaptasi air: berjalan di air dangkal 5 menit, 2) Latihan mengapung: dengan bantuan pelampung 10 menit, 3) Meluncur: dari pinggir kolam sejauh 3 meter, ulangi 8 kali, 4) Gerakan kaki: pegang pinggir kolam, latihan 5 menit, 5) Koordinasi dasar: gerakan kaki + tangan dengan pelampung 10 menit, 6) Permainan air: lempar tangkap bola di air 15 menit, 7) Latihan pernapasan: tiup gelembung di air 5 menit."
+                },
+                quiz: [
+                    {
+                        question: "Hal terpenting dalam olahraga air adalah?",
+                        options: ["Berenang cepat", "Keselamatan dan pengawasan", "Bermain bebas", "Tidak perlu aturan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Sebelum masuk air, kita harus?",
+                        options: ["Langsung terjun", "Pemanasan dan cek kedalaman air", "Makan banyak", "Berlari dulu"],
+                        correct: 1
+                    },
+                    {
+                        question: "Teknik mengapung yang benar adalah?",
+                        options: ["Tegang dan kaku", "Rileks dan tarik napas dalam", "Bergerak cepat", "Menahan napas lama"],
+                        correct: 1
+                    },
+                    {
+                        question: "Saat belajar renang, sebaiknya menggunakan?",
+                        options: ["Tidak perlu alat", "Pelampung atau alat bantu", "Pakaian tebal", "Sepatu"],
+                        correct: 1
+                    },
+                    {
+                        question: "Jika merasa lelah di air, kita harus?",
+                        options: ["Terus berenang", "Segera ke pinggir atau minta bantuan", "Menyelam dalam", "Berteriak keras"],
+                        correct: 1
+                    }
+                ]
+            },
+            7: {
+                title: "Aktivitas dan Pengembangan Kebugaran Jasmani",
+                icon: "💪",
+                content: {
+                    visual: "Perhatikan program kebugaran yang lebih terstruktur! Kebugaran jasmani kelas 3 meliputi: latihan kardiovaskular (lari, skipping), latihan kekuatan (push-up, sit-up modifikasi), latihan kelenturan (stretching), latihan keseimbangan dan koordinasi, serta program kebugaran harian yang teratur. Setiap latihan disesuaikan dengan kemampuan anak kelas 3.",
+                    auditory: "Program kebugaran jasmani yang tepat: Pertama, pemanasan 5 menit dengan jalan cepat dan peregangan ringan. Kedua, latihan kardio - lari di tempat 3 menit, skipping 2 menit. Ketiga, latihan kekuatan - push-up modifikasi 10 kali, sit-up dengan bantuan 12 kali. Keempat, latihan kelenturan - peregangan seluruh tubuh 8 menit. Kelima, latihan keseimbangan - berdiri satu kaki, jalan di garis lurus. Keenam, pendinginan dengan relaksasi 5 menit.",
+                    kinesthetic: "Mari berlatih kebugaran jasmani! 1) Pemanasan: jalan cepat 3 menit + peregangan dinamis 5 menit, 2) Kardio: lari di tempat 4 menit + skipping 3 menit + jumping jack 2 menit, 3) Kekuatan: push-up modifikasi 12 kali + sit-up bantuan 15 kali + squat 10 kali, 4) Kelenturan: peregangan statis seluruh tubuh 10 menit, 5) Koordinasi: lompat tali 3 menit + jalan garis lurus 2 menit, 6) Keseimbangan: berdiri satu kaki 20 detik x 4 kali, 7) Pendinginan: jalan santai + relaksasi 8 menit."
+                },
+                quiz: [
+                    {
+                        question: "Kebugaran jasmani bertujuan untuk?",
+                        options: ["Membuat lelah", "Menjaga kesehatan dan kekuatan tubuh", "Bermain saja", "Tidak ada tujuan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Komponen kebugaran jasmani meliputi?",
+                        options: ["Hanya kekuatan", "Kardio, kekuatan, kelenturan, keseimbangan", "Hanya lari", "Hanya peregangan"],
+                        correct: 1
+                    },
+                    {
+                        question: "Latihan kardiovaskular bermanfaat untuk?",
+                        options: ["Otot lengan", "Jantung dan paru-paru", "Mata", "Telinga"],
+                        correct: 1
+                    },
+                    {
+                        question: "Push-up modifikasi untuk kelas 3 dilakukan dengan?",
+                        options: ["Berdiri", "Lutut menyentuh lantai", "Satu tangan", "Mata tertutup"],
+                        correct: 1
+                    },
+                    {
+                        question: "Frekuensi latihan kebugaran yang baik adalah?",
+                        options: ["Sekali sebulan", "Setiap hari atau 3-4 kali seminggu", "Sekali setahun", "Tidak perlu teratur"],
+                        correct: 1
+                    }
+                ]
+            },
+            8: {
+                title: "Perilaku Hidup Sehat",
+                icon: "🍎",
+                content: {
+                    visual: "Lihat pola hidup sehat yang lebih komprehensif! Perilaku hidup sehat kelas 3 meliputi: pola makan seimbang dengan 4 sehat 5 sempurna, jadwal tidur yang teratur dan cukup, kebersihan diri yang menyeluruh, olahraga rutin dan terstruktur, manajemen waktu yang baik, dan kebiasaan positif sehari-hari. Pemahaman tentang nutrisi dan kesehatan lebih mendalam.",
+                    auditory: "Panduan hidup sehat yang lengkap: Pertama, makan teratur 3 kali sehari dengan menu seimbang - nasi, lauk protein, sayur, buah, dan susu. Kedua, tidur 9-10 jam setiap malam dengan jadwal tetap. Ketiga, menjaga kebersihan - mandi 2 kali, gosok gigi 3 kali, cuci tangan sebelum makan dan setelah aktivitas. Keempat, olahraga minimal 30 menit setiap hari. Kelima, minum air putih 8 gelas per hari. Keenam, hindari junk food dan perbanyak buah serta sayur.",
+                    kinesthetic: "Praktik hidup sehat sehari-hari! 1) Buat jadwal harian: waktu makan, belajar, olahraga, tidur, 2) Praktik cuci tangan 6 langkah dengan benar, 3) Siapkan menu makanan sehat untuk satu hari, 4) Lakukan olahraga ringan 30 menit, 5) Minum air putih sesuai jadwal (pagi, siang, sore, malam), 6) Praktik gosok gigi dengan teknik yang benar, 7) Buat catatan aktivitas harian selama seminggu, 8) Evaluasi kebiasaan sehat yang sudah dilakukan."
+                },
+                quiz: [
+                    {
+                        question: "Pola makan sehat untuk kelas 3 sebaiknya mengikuti prinsip?",
+                        options: ["Makan sesuka hati", "4 sehat 5 sempurna", "Hanya makan nasi", "Makan sekali sehari"],
+                        correct: 1
+                    },
+                    {
+                        question: "Berapa jam tidur yang dibutuhkan anak kelas 3 setiap malam?",
+                        options: ["4-5 jam", "6-7 jam", "9-10 jam", "12-15 jam"],
+                        correct: 2
+                    },
+                    {
+                        question: "Kapan saja kita harus mencuci tangan?",
+                        options: ["Hanya saat kotor", "Sebelum makan, setelah toilet, setelah bermain", "Sekali sehari", "Tidak perlu"],
+                        correct: 1
+                    },
+                    {
+                        question: "Makanan yang sebaiknya dihindari atau dibatasi adalah?",
+                        options: ["Sayur dan buah", "Junk food dan makanan manis berlebihan", "Nasi dan lauk", "Air putih"],
+                        correct: 1
+                    },
+                    {
+                        question: "Manfaat olahraga rutin bagi anak kelas 3 adalah?",
+                        options: ["Membuat lelah", "Menjaga kesehatan dan meningkatkan konsentrasi belajar", "Membuat lapar", "Tidak ada manfaat"],
+                        correct: 1
+                    }
+                ]
             }
-        }
-        window.checkAnswer = checkAnswer;
+        };
 
-
-        // --- GALLERY PAGE ---
-        function renderGalleryPage() {
-            const galleryItems = PJOK_APP.materials.map(m => {
-                const illu = getIllustration(m.animationType);
-                return `
-                    <div class="bg-white rounded-xl shadow-lg p-4 text-center border-b-2 border-primary-sky">
-                        <div class="text-7xl mb-3">${illu.emoji}</div>
-                        <h3 class="text-lg font-bold text-gray-800">${m.title}</h3>
-                        <p class="text-sm text-gray-600">${illu.text}</p>
-                        <button onclick="playAudioSimulation('Ini adalah gerakan ${illu.text.toLowerCase()}. ${m.title}. Ayo coba bersama!')" 
-                                class="mt-3 px-4 py-2 bg-primary-sky text-white text-sm rounded-full hover:bg-sky-600 transition duration-150">
-                            🗣️ Dengar Suara
-                        </button>
-                    </div>
-                `;
-            }).join('');
-
-            return `
-                <div class="pb-10">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-6 border-b-4 border-primary-sky/50 pb-2">Galeri Ilustrasi PJOK</h2>
-                    <p class="text-gray-600 mb-8">Klik gambar untuk mendengar penjelasan singkat dari Bu Siti!</p>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        ${galleryItems || `<p class="col-span-4 text-gray-500 italic">Galeri masih kosong.</p>`}
-                    </div>
-                </div>
-            `;
-        }
-
-
-        // --- ADMIN LOGIN PAGE (NEW) ---
-        function renderAdminLoginPage() {
-            return `
-                <div class="flex justify-center items-center py-20">
-                    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full border-t-4 border-red-500">
-                        <div class="text-center mb-6">
-                            <i class="ph-lock-key-fill text-5xl text-red-500"></i>
-                            <h2 class="text-2xl font-bold text-gray-800 mt-3">Akses Guru PJOK</h2>
-                            <p class="text-sm text-gray-600">Masukkan kata sandi untuk mengelola materi.</p>
-                        </div>
-                        <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
-                            <label class="block mb-4">
-                                <span class="text-gray-700 font-medium">Kata Sandi Admin</span>
-                                <input type="password" id="admin-password" required 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50">
-                            </label>
-                            <div id="login-feedback" class="text-center text-red-500 mb-4 font-medium"></div>
-                            <button type="submit" 
-                                class="w-full px-4 py-3 bg-red-500 text-white font-bold rounded-lg btn-interact hover:bg-red-600 flex items-center justify-center">
-                                <i class="ph-sign-in-fill mr-2 text-xl"></i> Masuk
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-        window.renderAdminLoginPage = renderAdminLoginPage;
-
-        function handleAdminLogin(event) {
-            event.preventDefault();
-            const passwordInput = document.getElementById('admin-password');
-            const feedback = document.getElementById('login-feedback');
-
-            if (passwordInput.value === PJOK_APP.ADMIN_PASSWORD) {
-                PJOK_APP.isAdmin = true;
-                feedback.textContent = 'Login Berhasil! Mengarahkan...';
-                feedback.classList.remove('text-red-500');
-                feedback.classList.add('text-secondary-leaf');
-                setTimeout(() => navigate('admin'), 500);
-            } else {
-                feedback.textContent = 'Kata Sandi Salah. Silakan coba lagi.';
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
-        }
-        window.handleAdminLogin = handleAdminLogin;
-
-
-        // --- ADMIN PANEL RENDERING & LOGIC ---
-
-        function handleAdminLogout() {
-            PJOK_APP.isAdmin = false;
-            showModal("Logout Sukses", "Anda telah keluar dari mode administrator. Akses manajemen materi ditutup.");
-            navigate('home');
-        }
-        window.handleAdminLogout = handleAdminLogout;
-
-        function renderAdminPage() {
-            const materialList = PJOK_APP.materials.map(m => `
-                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition duration-150">
-                    <span class="font-medium text-gray-800 w-3/5">(${m.order || '?'}) ${m.title}</span>
-                    <span class="text-sm text-primary-sky w-1/5">${m.theme}</span>
-                    <div class="space-x-2">
-                        <button onclick="openEditModal('${m.id}')" class="text-accent-orange hover:text-orange-600 p-1 rounded">
-                            <i class="ph-pencil-simple-fill"></i> Edit
-                        </button>
-                        <button onclick="confirmDelete('${m.id}', '${m.title}')" class="text-red-500 hover:text-red-700 p-1 rounded">
-                            <i class="ph-trash-fill"></i> Hapus
-                        </button>
-                    </div>
-                </li>
-            `).join('');
-
-            return `
-                <div class="pb-10">
-                    <div class="flex justify-between items-center mb-6 border-b-4 border-red-500/50 pb-2">
-                        <h2 class="text-3xl font-extrabold text-red-500">⚙️ Manajemen Materi (Mode Admin Aktif)</h2>
-                        <button onclick="handleAdminLogout()" 
-                            class="px-4 py-2 bg-gray-600 text-white text-sm font-bold rounded-full hover:bg-gray-700 transition duration-150">
-                            <i class="ph-sign-out-fill mr-1"></i> Logout
-                        </button>
-                    </div>
-
-                    <p class="text-gray-700 mb-6">Di sini Anda dapat menambah, mengubah, dan menghapus materi pembelajaran PJOK.</p>
-
-                    <button onclick="openAddModal()" 
-                        class="px-6 py-3 mb-8 bg-secondary-leaf text-white font-bold rounded-full btn-interact hover:bg-green-600 flex items-center">
-                        <i class="ph-plus-circle-fill mr-2 text-xl"></i> Tambah Materi Baru
-                    </button>
-
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Daftar Materi Aktif (${PJOK_APP.materials.length})</h3>
-                    <ul class="space-y-2 bg-white p-4 rounded-lg shadow-inner">
-                        ${materialList || '<li class="text-gray-500 italic">Belum ada materi yang ditambahkan.</li>'}
-                    </ul>
-                </div>
-            `;
-        }
-
-        function openAddModal() {
-            const formData = { title: '', narration: '', description: '', theme: 'Semester 1', keywords: '', animationType: 'lokomotor', order: PJOK_APP.materials.length + 1 };
-            renderMaterialForm(formData, 'add');
-        }
-        window.openAddModal = openAddModal;
-
-        function openEditModal(id) {
-            const material = PJOK_APP.materials.find(m => m.id === id);
-            if (!material) {
-                showModal('Error', 'Materi tidak ditemukan!');
-                return;
-            }
-            // Prepare keywords as string for textarea
-            const formData = { 
-                ...material, 
-                keywords: (material.keywords || []).join(', ') 
-            };
-            renderMaterialForm(formData, 'edit');
-        }
-        window.openEditModal = openEditModal;
-
-        function renderMaterialForm(data, mode) {
-            const isEdit = mode === 'edit';
-            const title = isEdit ? `Edit Materi: ${data.title}` : 'Tambah Materi Baru';
-            const buttonText = isEdit ? 'Simpan Perubahan' : 'Tambahkan Materi';
-            
-            const formHtml = `
-                <form id="material-form">
-                    <input type="hidden" name="id" value="${data.id || ''}">
-                    <div class="space-y-4">
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Judul Materi (Contoh: Gerak Lokomotor)</span>
-                            <input type="text" name="title" value="${data.title}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Nomor Urut Tema (1-10, untuk menentukan Semester)</span>
-                            <input type="number" name="order" value="${data.order || ''}" required min="1" max="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Tema Semester (Otomatis berdasarkan Nomor Urut)</span>
-                            <select name="theme" disabled class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100">
-                                <option value="Semester 1" ${(data.order <= 5) ? 'selected' : ''}>Semester 1 (Tema 1-5)</option>
-                                <option value="Semester 2" ${(data.order > 5) ? 'selected' : ''}>Semester 2 (Tema 6-10)</option>
-                            </select>
-                            <input type="hidden" name="theme_value" value="${(data.order <= 5) ? 'Semester 1' : 'Semester 2'}">
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Narasi Cerita Singkat (Maks. 1 Kalimat)</span>
-                            <textarea name="narration" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">${data.narration}</textarea>
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Deskripsi Lengkap (Isi Materi)</span>
-                            <textarea name="description" rows="5" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 whitespace-pre-wrap">${data.description}</textarea>
-                        </label>
-                         <label class="block">
-                            <span class="text-gray-700 font-medium">Kata Kunci Kuis (Pisahkan dengan koma, contoh: berlari, melompat, jalan)</span>
-                            <textarea name="keywords" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">${data.keywords || ''}</textarea>
-                        </label>
-                        <label class="block">
-                            <span class="text-gray-700 font-medium">Tipe Animasi/Ilustrasi (Untuk ikon galeri)</span>
-                            <select name="animationType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
-                                ${Object.keys(getIllustration()).map(type => `<option value="${type}" ${data.animationType === type ? 'selected' : ''}>${type} (${getIllustration(type).emoji})</option>`).join('')}
-                            </select>
-                        </label>
-                        <!-- Audio Upload Simulation (Cannot handle file uploads directly in this setup) -->
-                        <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
-                            <i class="ph-info-fill mr-1"></i> Audio URL (Saat ini disimulasikan, jika ada file Lottie/Audio, masukkan URL di sini):
-                            <input type="text" name="audioUrl" value="${data.audioUrl || ''}" placeholder="http://..." class="mt-1 block w-full rounded-md border-blue-200 shadow-sm p-2">
-                        </div>
-                    </div>
-                    <div class="mt-6 flex justify-end">
-                        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150 mr-3">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-secondary-leaf text-white font-bold rounded-lg hover:bg-green-600 transition duration-150">
-                            ${buttonText}
-                        </button>
-                    </div>
-                </form>
-            `;
-
-            showModal(title, formHtml, false, buttonText);
-            
-            // Attach submit handler
-            document.getElementById('material-form').onsubmit = async function(e) {
-                e.preventDefault();
-                const form = e.target;
-                const orderValue = parseInt(form.order.value, 10);
-
-                const data = {
-                    title: form.title.value,
-                    narration: form.narration.value,
-                    description: form.description.value,
-                    // Tentukan tema berdasarkan urutan (1-5 = S1, 6-10 = S2)
-                    theme: orderValue <= 5 ? 'Semester 1' : 'Semester 2', 
-                    animationType: form.animationType.value,
-                    audioUrl: form.audioUrl.value,
-                    order: orderValue,
-                    // Convert keywords string to array
-                    keywords: form.keywords.value.split(',').map(k => k.trim()).filter(k => k.length > 0)
-                };
-
-                if (mode === 'add') {
-                    await window.addMaterial(data);
-                } else if (mode === 'edit') {
-                    await window.updateMaterial(form.id.value, data);
-                }
-                closeModal();
-                navigate('admin'); // Stay on admin page
-            };
-        }
-
-        function confirmDelete(id, title) {
-            const body = `<p>Anda yakin ingin menghapus materi <strong>"${title}"</strong>? Aksi ini tidak bisa dibatalkan.</p>`;
-            showModal('Konfirmasi Hapus', body, true, 'Hapus', () => {
-                window.deleteMaterial(id);
-                closeModal();
-            });
-        }
-        window.confirmDelete = confirmDelete;
-
-        // --- UNIVERSAL MODAL HANDLER ---
-        function showModal(title, body, isConfirm = false, confirmText = 'OK', onConfirm = null) {
-            const modal = document.getElementById('universal-modal');
-            const titleEl = document.getElementById('modal-title');
-            const bodyEl = document.getElementById('modal-body');
-            const footerEl = document.getElementById('modal-footer');
-
-            titleEl.textContent = title;
-            bodyEl.innerHTML = body;
-            
-            footerEl.innerHTML = '';
-
-            if (isConfirm) {
-                const cancelBtn = `<button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150 mr-3">Batal</button>`;
-                const confirmBtn = `<button id="modal-confirm-btn" class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 transition duration-150">${confirmText}</button>`;
+        // Data SDK Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                // Separate materials and quiz questions
+                materials = data.filter(item => item.type === 'visual' || item.type === 'auditory' || item.type === 'kinesthetic');
+                quizQuestions = data.filter(item => item.type === 'quiz');
                 
-                footerEl.innerHTML = cancelBtn + confirmBtn;
+                if (document.getElementById('materials-list')) {
+                    displayMaterials();
+                }
+                if (document.getElementById('quiz-list')) {
+                    displayQuizQuestions();
+                }
+            }
+        };
 
-                document.getElementById('modal-confirm-btn').onclick = onConfirm;
-
-            } else {
-                footerEl.innerHTML = `<button onclick="closeModal()" class="px-4 py-2 bg-primary-sky text-white font-bold rounded-lg hover:bg-sky-600 transition duration-150">Tutup</button>`;
+        // Initialize application
+        async function initApp() {
+            // Initialize Data SDK
+            const initResult = await window.dataSdk.init(dataHandler);
+            if (!initResult.isOk) {
+                console.error("Failed to initialize data SDK");
             }
 
-            // Show modal with transition effects
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.querySelector('div:first-child').classList.remove('scale-95');
-            modal.querySelector('div:first-child').classList.add('scale-100');
+            // Initialize Element SDK
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => {
+                        const titleElement = document.getElementById('site-title');
+                        const welcomeElement = document.getElementById('welcome-message');
+                        const teacherElement = document.getElementById('teacher-name');
+                        
+                        if (titleElement) {
+                            titleElement.textContent = config.site_title || defaultConfig.site_title;
+                        }
+                        if (welcomeElement) {
+                            welcomeElement.textContent = config.welcome_message || defaultConfig.welcome_message;
+                        }
+                        if (teacherElement) {
+                            teacherElement.textContent = config.teacher_name || defaultConfig.teacher_name;
+                        }
+                    },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ["site_title", config.site_title || defaultConfig.site_title],
+                        ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
+                        ["teacher_name", config.teacher_name || defaultConfig.teacher_name]
+                    ])
+                });
+            }
         }
-        window.showModal = showModal;
+
+        // Navigation functions
+        function showHome() {
+            closeModal();
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function showHelp() {
+            closeModal();
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        function showAdminLogin() {
+            closeModal();
+            document.getElementById('adminLoginModal').style.display = 'block';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('login-message').innerHTML = '';
+        }
 
         function closeModal() {
-            const modal = document.getElementById('universal-modal');
-            
-            // Hide modal with transition effects
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.querySelector('div:first-child').classList.add('scale-95');
-            modal.querySelector('div:first-child').classList.remove('scale-100');
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => modal.style.display = 'none');
         }
-        window.closeModal = closeModal;
-        
-    </script>
 
-</body>
+        // Chapter functions
+        function openChapter(chapterNum) {
+            currentChapter = chapterNum;
+            const chapter = chapters[chapterNum];
+            
+            document.getElementById('modal-title').textContent = `Bab ${chapterNum}: ${chapter.title}`;
+            document.getElementById('content-display').classList.add('hidden');
+            document.getElementById('quiz-section').classList.add('hidden');
+            
+            // Remove existing quiz button container if any
+            const existingQuizButton = document.getElementById('quiz-button-container');
+            if (existingQuizButton) {
+                existingQuizButton.remove();
+            }
+            
+            document.getElementById('chapterModal').style.display = 'block';
+        }
+
+        function showContent(type) {
+            const chapter = chapters[currentChapter];
+            const contentDisplay = document.getElementById('content-display');
+            const contentText = document.getElementById('content-text');
+            const customMaterials = document.getElementById('custom-materials');
+            
+            contentText.innerHTML = `
+                <h3>${getTypeTitle(type)}</h3>
+                <p>${chapter.content[type]}</p>
+            `;
+            
+            // Show custom materials for this chapter and type
+            const chapterMaterials = materials.filter(m => 
+                m.chapter === currentChapter.toString() && m.type === type
+            );
+            
+            if (chapterMaterials.length > 0) {
+                customMaterials.innerHTML = '<h4>Materi Tambahan:</h4>' + 
+                    chapterMaterials.map(material => `
+                        <div class="material-item">
+                            <h5>${material.title}</h5>
+                            <p>${material.content}</p>
+                            ${material.image_url ? `
+                                <div style="margin: 15px 0;">
+                                    <img src="${material.image_url}" alt="${material.title}" 
+                                         style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <div style="display: none; background: #f56565; color: white; padding: 10px; border-radius: 5px; text-align: center;">
+                                        Gambar tidak dapat dimuat
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${material.audio_url ? `
+                                <div style="margin: 15px 0;">
+                                    <audio controls style="width: 100%; border-radius: 10px;">
+                                        <source src="${material.audio_url}" type="audio/mpeg">
+                                        <source src="${material.audio_url}" type="audio/wav">
+                                        <source src="${material.audio_url}" type="audio/ogg">
+                                        Browser Anda tidak mendukung audio.
+                                    </audio>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+            } else {
+                customMaterials.innerHTML = '';
+            }
+            
+            contentDisplay.classList.remove('hidden');
+            
+            // Show quiz button only once - check if it doesn't exist already
+            if (!document.getElementById('quiz-button-container')) {
+                const quizButtonContainer = document.createElement('div');
+                quizButtonContainer.id = 'quiz-button-container';
+                quizButtonContainer.style.cssText = 'text-align: center; margin-top: 25px; padding: 25px;';
+                quizButtonContainer.innerHTML = `
+                    <button class="btn" onclick="startQuiz()" style="font-size: 19px; padding: 18px 35px;">
+                        🧠 Mulai Kuis Kelas 3
+                    </button>
+                `;
+                contentDisplay.appendChild(quizButtonContainer);
+            }
+        }
+
+        function getTypeTitle(type) {
+            const titles = {
+                visual: '👀 Pembelajaran Visual',
+                auditory: '👂 Pembelajaran Auditori', 
+                kinesthetic: '🤸‍♀️ Pembelajaran Kinestetik'
+            };
+            return titles[type] || 'Pembelajaran';
+        }
+
+        // Quiz functions
+        function startQuiz() {
+            currentQuizQuestion = 0;
+            quizAnswers = [];
+            document.getElementById('quiz-section').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            // Get questions from both default and custom sources
+            const defaultQuestions = chapters[currentChapter].quiz;
+            const customQuestions = quizQuestions.filter(q => q.chapter === currentChapter.toString());
+            const allQuestions = [...defaultQuestions, ...customQuestions];
+            
+            if (currentQuizQuestion >= allQuestions.length) {
+                showQuizResults();
+                return;
+            }
+            
+            const question = allQuestions[currentQuizQuestion];
+            
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="quiz-question">
+                    Soal ${currentQuizQuestion + 1}: ${question.question}
+                    ${question.image_url ? `
+                        <div style="margin: 15px 0; text-align: center;">
+                            <img src="${question.image_url}" alt="Gambar soal" 
+                                 style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none; background: #f56565; color: white; padding: 10px; border-radius: 5px; text-align: center;">
+                                Gambar tidak dapat dimuat
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="quiz-options">
+                    ${(question.options || []).map((option, index) => `
+                        <div class="quiz-option" onclick="selectAnswer(${index})" data-index="${index}">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('finish-btn').style.display = 'none';
+        }
+
+        function selectAnswer(answerIndex) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[answerIndex].classList.add('selected');
+            
+            // Get questions from both default and custom sources
+            const defaultQuestions = chapters[currentChapter].quiz;
+            const customQuestions = quizQuestions.filter(q => q.chapter === currentChapter.toString());
+            const allQuestions = [...defaultQuestions, ...customQuestions];
+            const question = allQuestions[currentQuizQuestion];
+            
+            // Show correct/incorrect
+            setTimeout(() => {
+                options.forEach((option, index) => {
+                    if (index === question.correct) {
+                        option.classList.add('correct');
+                    } else if (index === answerIndex && index !== question.correct) {
+                        option.classList.add('incorrect');
+                    }
+                });
+                
+                quizAnswers[currentQuizQuestion] = answerIndex;
+                
+                if (currentQuizQuestion < allQuestions.length - 1) {
+                    document.getElementById('next-btn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('finish-btn').style.display = 'inline-block';
+                }
+            }, 500);
+        }
+
+        function nextQuestion() {
+            currentQuizQuestion++;
+            showQuestion();
+        }
+
+        function showQuizResults() {
+            // Get questions from both default and custom sources
+            const defaultQuestions = chapters[currentChapter].quiz;
+            const customQuestions = quizQuestions.filter(q => q.chapter === currentChapter.toString());
+            const allQuestions = [...defaultQuestions, ...customQuestions];
+            
+            let correct = 0;
+            
+            quizAnswers.forEach((answer, index) => {
+                if (answer === allQuestions[index].correct) {
+                    correct++;
+                }
+            });
+            
+            const percentage = Math.round((correct / allQuestions.length) * 100);
+            let message = '';
+            let emoji = '';
+            
+            if (percentage >= 85) {
+                message = 'Luar biasa! Kamu sangat menguasai materi kelas 3!';
+                emoji = '🌟';
+            } else if (percentage >= 70) {
+                message = 'Bagus sekali! Kamu memahami materi dengan baik!';
+                emoji = '👍';
+            } else if (percentage >= 60) {
+                message = 'Cukup baik! Terus belajar untuk hasil yang lebih baik!';
+                emoji = '📚';
+            } else {
+                message = 'Ayo belajar lagi! Kamu pasti bisa menguasai materi ini!';
+                emoji = '💪';
+            }
+            
+            document.getElementById('quiz-content').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 4.5rem; margin-bottom: 25px;">${emoji}</div>
+                    <h3>Hasil Kuis Kelas 3</h3>
+                    <p style="font-size: 2.2rem; margin: 25px 0;">
+                        ${correct}/${allQuestions.length} (${percentage}%)
+                    </p>
+                    <p style="font-size: 1.3rem;">${message}</p>
+                    <button class="btn" onclick="startQuiz()" style="margin: 12px;">🔄 Ulangi Kuis</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">🏠 Kembali ke Beranda</button>
+                </div>
+            `;
+            
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('finish-btn').style.display = 'none';
+        }
+
+        // Toggle media fields based on material type
+        function toggleMediaFields() {
+            const type = document.getElementById('admin-type').value;
+            const imageGroup = document.getElementById('image-group');
+            const audioGroup = document.getElementById('audio-group');
+            
+            // Hide all media fields first
+            imageGroup.style.display = 'none';
+            audioGroup.style.display = 'none';
+            
+            // Show relevant field based on type
+            if (type === 'visual') {
+                imageGroup.style.display = 'block';
+            } else if (type === 'auditory') {
+                audioGroup.style.display = 'block';
+            }
+        }
+
+        // Admin functions
+        function adminLogin() {
+            const password = document.getElementById('admin-password').value;
+            const messageDiv = document.getElementById('login-message');
+            
+            if (password === 'adminpjok3') {
+                isAdminLoggedIn = true;
+                messageDiv.innerHTML = '<div class="success-message">Login berhasil! Mengalihkan ke panel admin...</div>';
+                setTimeout(() => {
+                    closeModal();
+                    document.getElementById('adminPanel').style.display = 'block';
+                    showAdminTab('materials'); // Show materials tab by default
+                    loadMaterials();
+                    toggleMediaFields(); // Initialize media fields visibility
+                }, 1500);
+            } else {
+                messageDiv.innerHTML = '<div class="error-message">Password salah! Silakan coba lagi.</div>';
+            }
+        }
+
+        function showAdminTab(tabName) {
+            // Hide all panels
+            document.getElementById('materials-panel').classList.add('hidden');
+            document.getElementById('quiz-panel').classList.add('hidden');
+            
+            // Reset tab buttons
+            document.getElementById('materials-tab').style.background = 'linear-gradient(45deg, #74b9ff, #0984e3)';
+            document.getElementById('quiz-tab').style.background = 'linear-gradient(45deg, #74b9ff, #0984e3)';
+            
+            // Show selected panel and highlight tab
+            if (tabName === 'materials') {
+                document.getElementById('materials-panel').classList.remove('hidden');
+                document.getElementById('materials-tab').style.background = 'linear-gradient(45deg, #ff6b6b, #feca57)';
+                loadMaterials();
+            } else if (tabName === 'quiz') {
+                document.getElementById('quiz-panel').classList.remove('hidden');
+                document.getElementById('quiz-tab').style.background = 'linear-gradient(45deg, #ff6b6b, #feca57)';
+                loadQuizQuestions();
+            }
+        }
+
+        async function addMaterial() {
+            if (!isAdminLoggedIn) return;
+            
+            const chapter = document.getElementById('admin-chapter').value;
+            const type = document.getElementById('admin-type').value;
+            const title = document.getElementById('admin-title').value;
+            const content = document.getElementById('admin-content').value;
+            const imageUrl = document.getElementById('admin-image').value;
+            const audioUrl = document.getElementById('admin-audio').value;
+            const messageDiv = document.getElementById('admin-message');
+            const addBtn = document.getElementById('add-btn');
+            const loading = addBtn.querySelector('.loading');
+            
+            if (!title || !content) {
+                messageDiv.innerHTML = '<div class="error-message">Harap isi semua field wajib!</div>';
+                return;
+            }
+            
+            // Show loading state
+            loading.classList.remove('hidden');
+            addBtn.disabled = true;
+            
+            const materialData = {
+                id: Date.now().toString(),
+                chapter: chapter,
+                type: type,
+                title: title,
+                content: content,
+                image_url: imageUrl || null,
+                audio_url: audioUrl || null,
+                created_at: new Date().toISOString()
+            };
+            
+            const result = await window.dataSdk.create(materialData);
+            
+            // Hide loading state
+            loading.classList.add('hidden');
+            addBtn.disabled = false;
+            
+            if (result.isOk) {
+                messageDiv.innerHTML = '<div class="success-message">Materi berhasil ditambahkan!</div>';
+                // Clear form
+                document.getElementById('admin-title').value = '';
+                document.getElementById('admin-content').value = '';
+                document.getElementById('admin-image').value = '';
+                document.getElementById('admin-audio').value = '';
+            } else {
+                messageDiv.innerHTML = '<div class="error-message">Gagal menambahkan materi. Silakan coba lagi.</div>';
+            }
+        }
+
+        function loadMaterials() {
+            const materialsList = document.getElementById('materials-list');
+            if (materials.length === 0) {
+                materialsList.innerHTML = '<p style="text-align: center; color: #fff;">Belum ada materi tambahan.</p>';
+                return;
+            }
+            
+            materialsList.innerHTML = `
+                <h4 style="color: #fff; margin-top: 30px;">Daftar Materi (${materials.length}/999)</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${materials.map(material => `
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                            <h5 style="color: #fff; margin: 0 0 10px 0;">
+                                Bab ${material.chapter} - ${material.type} - ${material.title}
+                            </h5>
+                            <p style="color: #fff; margin: 0 0 10px 0; font-size: 14px;">
+                                ${material.content.substring(0, 100)}${material.content.length > 100 ? '...' : ''}
+                            </p>
+                            <button class="btn btn-danger" onclick="deleteMaterial('${material.__backendId}')" style="font-size: 12px; padding: 8px 16px;">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function displayMaterials() {
+            if (document.getElementById('materials-list')) {
+                loadMaterials();
+            }
+        }
+
+        async function deleteMaterial(backendId) {
+            if (!isAdminLoggedIn) return;
+            
+            const material = materials.find(m => m.__backendId === backendId);
+            if (!material) return;
+            
+            const result = await window.dataSdk.delete(material);
+            
+            const messageDiv = document.getElementById('admin-message');
+            if (result.isOk) {
+                messageDiv.innerHTML = '<div class="success-message">Materi berhasil dihapus!</div>';
+            } else {
+                messageDiv.innerHTML = '<div class="error-message">Gagal menghapus materi. Silakan coba lagi.</div>';
+            }
+        }
+
+        // Quiz management functions
+        async function addQuizQuestion() {
+            if (!isAdminLoggedIn) return;
+            
+            const chapter = document.getElementById('quiz-chapter').value;
+            const question = document.getElementById('quiz-question').value;
+            const optionA = document.getElementById('quiz-option-a').value;
+            const optionB = document.getElementById('quiz-option-b').value;
+            const optionC = document.getElementById('quiz-option-c').value;
+            const optionD = document.getElementById('quiz-option-d').value;
+            const correct = parseInt(document.getElementById('quiz-correct').value);
+            const imageUrl = document.getElementById('quiz-image').value;
+            const messageDiv = document.getElementById('quiz-message');
+            const addBtn = document.getElementById('add-quiz-btn');
+            const loading = addBtn.querySelector('.loading');
+            
+            if (!question || !optionA || !optionB || !optionC || !optionD) {
+                messageDiv.innerHTML = '<div class="error-message">Harap isi semua field pertanyaan dan pilihan jawaban!</div>';
+                return;
+            }
+            
+            // Show loading state
+            loading.classList.remove('hidden');
+            addBtn.disabled = true;
+            
+            const quizData = {
+                id: Date.now().toString(),
+                chapter: chapter,
+                type: 'quiz',
+                question: question,
+                options: JSON.stringify([optionA, optionB, optionC, optionD]),
+                correct: correct,
+                image_url: imageUrl || null,
+                created_at: new Date().toISOString()
+            };
+            
+            const result = await window.dataSdk.create(quizData);
+            
+            // Hide loading state
+            loading.classList.add('hidden');
+            addBtn.disabled = false;
+            
+            if (result.isOk) {
+                messageDiv.innerHTML = '<div class="success-message">Soal kuis berhasil ditambahkan!</div>';
+                // Clear form
+                document.getElementById('quiz-question').value = '';
+                document.getElementById('quiz-option-a').value = '';
+                document.getElementById('quiz-option-b').value = '';
+                document.getElementById('quiz-option-c').value = '';
+                document.getElementById('quiz-option-d').value = '';
+                document.getElementById('quiz-correct').value = '0';
+                document.getElementById('quiz-image').value = '';
+            } else {
+                messageDiv.innerHTML = '<div class="error-message">Gagal menambahkan soal kuis. Silakan coba lagi.</div>';
+            }
+        }
+
+        function loadQuizQuestions() {
+            const quizList = document.getElementById('quiz-list');
+            if (quizQuestions.length === 0) {
+                quizList.innerHTML = '<p style="text-align: center; color: #fff;">Belum ada soal kuis tambahan.</p>';
+                return;
+            }
+            
+            quizList.innerHTML = `
+                <h4 style="color: #fff; margin-top: 30px;">Daftar Soal Kuis (${quizQuestions.length}/999)</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${quizQuestions.map(quiz => {
+                        const options = JSON.parse(quiz.options || '[]');
+                        return `
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                                <h5 style="color: #fff; margin: 0 0 10px 0;">
+                                    Bab ${quiz.chapter} - ${quiz.question.substring(0, 50)}${quiz.question.length > 50 ? '...' : ''}
+                                </h5>
+                                <div style="color: #fff; margin: 5px 0; font-size: 14px;">
+                                    <strong>Pilihan:</strong><br>
+                                    A. ${options[0] || ''}<br>
+                                    B. ${options[1] || ''}<br>
+                                    C. ${options[2] || ''}<br>
+                                    D. ${options[3] || ''}<br>
+                                    <strong>Jawaban Benar:</strong> ${['A', 'B', 'C', 'D'][quiz.correct]}
+                                </div>
+                                ${quiz.image_url ? `
+                                    <div style="margin: 10px 0;">
+                                        <img src="${quiz.image_url}" alt="Gambar soal" 
+                                             style="max-width: 200px; max-height: 150px; border-radius: 5px;"
+                                             onerror="this.style.display='none';">
+                                    </div>
+                                ` : ''}
+                                <button class="btn btn-danger" onclick="deleteQuizQuestion('${quiz.__backendId}')" style="font-size: 12px; padding: 8px 16px;">
+                                    🗑️ Hapus
+                                </button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function displayQuizQuestions() {
+            if (document.getElementById('quiz-list')) {
+                loadQuizQuestions();
+            }
+        }
+
+        async function deleteQuizQuestion(backendId) {
+            if (!isAdminLoggedIn) return;
+            
+            const quiz = quizQuestions.find(q => q.__backendId === backendId);
+            if (!quiz) return;
+            
+            const result = await window.dataSdk.delete(quiz);
+            
+            const messageDiv = document.getElementById('quiz-message');
+            if (result.isOk) {
+                messageDiv.innerHTML = '<div class="success-message">Soal kuis berhasil dihapus!</div>';
+            } else {
+                messageDiv.innerHTML = '<div class="error-message">Gagal menghapus soal kuis. Silakan coba lagi.</div>';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99794ab136163db0',t:'MTc2MTk3ODA4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
